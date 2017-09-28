@@ -208,7 +208,7 @@ final class News_Match_Popup_Basics {
 		$new_post = array(
 			'post_title' => 'News Match Default Popup',
 			'post_content' => 'The text, graphics, shortcodes and links in this area are displayed in your popup.',
-			'post_status' => 'publish',
+			'post_status' => 'draft',
 			'post_date' => date('Y-m-d H:i:s'),
 			'post_author' => $user_ID,
 			'post_type' => 'popup',
@@ -216,7 +216,7 @@ final class News_Match_Popup_Basics {
 		);
 		$post_id = wp_insert_post( $new_post );
 
-		// If creating the post did not work, create an error message.
+	 	// If creating the post did not work, create an error message.
 		if ( empty( $post_id ) || false == $post_id ) {
 			$default_message = __( 'News Match Popup Basics encountered an error while creating the default popup.', 'news-match-popup-basics' );
 			$details = sprintf(
@@ -328,14 +328,15 @@ final class News_Match_Popup_Basics {
 
 		// Success!
 		// translators: %1$s is a wordpress admin URL and %2$s is the ID of the post (part of the url)
-		$message = sprintf(
+		$messages[] = sprintf(
 			__( 'Your new default popup has been created! <a href="%1$s%2$s">Edit it now</a>.', 'news-match-popup-basics' ),
 			admin_url( 'post.php?action=edit&post=' ),
 			esc_attr( $post_id )
 		);
+		$messages[] = __( 'It is now safe to deactivate and remove the News Match Popup Basics plugin.', 'news-match-popup-basics' );
 		$this->admin_messages[] = sprintf(
 			'<div id="nmpb-message" class="updated notice"><p>%1$s</p></div>',
-			$message
+			implode( '</p><p>', $messages )
 		);
 
 		error_log(var_export( $this->admin_messages, true));
