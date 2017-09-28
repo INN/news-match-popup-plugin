@@ -244,90 +244,77 @@ final class News_Match_Popup_Basics {
 		// Create the post meta.
 		$meta = array(
 			// key => value
-			'popup_display' => maybe_serialize(
-				array (
-					'size' => 'large',
-					'responsive_min_width' => '',
-					'responsive_max_width' => '',
-					'custom_width' => '500',
-					'custom_height' => '380',
-					'overlay_disabled' => '1',
-					'animation_type' => 'slide',
-					'animation_speed' => '350',
-					'animation_origin' => 'center bottom',
-					'position_fixed' => '1',
-					'location' => 'center bottom',
-					'position_bottom' => '0',
-					'position_top' => '100',
-					'position_left' => '0',
-					'position_right' => '0',
-					'overlay_zindex' => '1999999998',
-					'zindex' => '1999999999',
-					'responsive_min_width_unit' => 'px',
-					'responsive_max_width_unit' => 'px',
-					'custom_width_unit' => 'px',
-					'custom_height_unit' => 'px',
-				)
+			'popup_display' => 	array (
+				'size' => 'large',
+				'responsive_min_width' => '',
+				'responsive_max_width' => '',
+				'custom_width' => '500',
+				'custom_height' => '380',
+				'overlay_disabled' => '1',
+				'animation_type' => 'slide',
+				'animation_speed' => '350',
+				'animation_origin' => 'center bottom',
+				'position_fixed' => '1',
+				'location' => 'center bottom',
+				'position_bottom' => '0',
+				'position_top' => '100',
+				'position_left' => '0',
+				'position_right' => '0',
+				'overlay_zindex' => '1999999998',
+				'zindex' => '1999999999',
+				'responsive_min_width_unit' => 'px',
+				'responsive_max_width_unit' => 'px',
+				'custom_width_unit' => 'px',
+				'custom_height_unit' => 'px',
 			),
-			'popup_close' => maybe_serialize(
-				array (
-					'text' => '',
-					'button_delay' => '0',
-					'overlay_click' => 'true',
-					'esc_press' => 'true',
-				)
+			'popup_close' =>array (
+				'text' => '',
+				'button_delay' => '0',
+				'overlay_click' => 'true',
+				'esc_press' => 'true',
 			),
 			'popup_title' => '',
 			'popup_teme' => null, // This should be the ID of an existing popup theme, probably the default, ack
-			'popup_triggers' => maybe_serialize(
+			'popup_triggers' => array(
 				array (
-					0 => 
+					'type' => 'auto_open',
+					'settings' =>
 					array (
-						'type' => 'auto_open',
-						'settings' => 
+						'delay' => '500',
+						'cookie' =>
 						array (
-							'delay' => '500',
-							'cookie' => 
+							'name' =>
 							array (
-								'name' => 
-								array (
-									0 => esc_attr( sprintf(
-										'pum-%1$s',
-										$post_id
-									) ),
-								),
+								0 => esc_attr( sprintf(
+									'pum-%1$s',
+									$post_id
+								) ),
 							),
 						),
 					),
 				)
 			),
-			'popup_cookies' => maybe_serialize(
+			'popup_cookies' => array(
 				array (
-					0 => 
+					'event' => 'on_popup_close',
+					'settings' =>
 					array (
-						'event' => 'on_popup_close',
-						'settings' => 
-						array (
-							'name' => esc_attr( sprintf(
-								'pum-%1$s',
-								$post_id
-							) ),
-							'key' => '',
-							'time' => '1 year',
-							'path' => 1,
-						),
+						'name' => esc_attr( sprintf(
+							'pum-%1$s',
+							$post_id
+						) ),
+						'key' => '',
+						'time' => '1 year',
+						'path' => 1,
 					),
 				)
 			),
-			'popup_conditions' => maybe_serialize(
+			'popup_conditions' => array(
 				array (
-					0 => 
+					0 =>
 					array (
-						0 => 
-						array (
-							'not_operand' => 0,
-							'target' => 'is_front_page',
-						),
+						'not_operand' => 0,
+						'target' => 'is_front_page',
 					),
 				)
 			),
