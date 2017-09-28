@@ -79,16 +79,12 @@ final class News_Match_Popup_Basics {
 	protected $admin_messages = array();
 
 	/**
-	 * Option name for storing admin notices and other things.
+	 * Transient name for storing admin notices and other things.
 	 *
-	 * current structure:
-	 * array(
-	 *     'messages' => array() // not expected to persist beyond one page load
-	 * )
 	 * @var array
 	 * @since 0.1.0
 	 */
-	protected $option = 'news_match_popup_basics';
+	protected $transient = 'news_match_popup_basics_messages';
 
 	/**
 	 * Singleton instance of plugin.
@@ -170,7 +166,7 @@ final class News_Match_Popup_Basics {
 	 * @since  0.1.0
 	 */
 	public function _deactivate() {
-		delete_option( $this->option );
+		delete_transient( $this->transient );
 	}
 
 	/**
@@ -199,8 +195,6 @@ final class News_Match_Popup_Basics {
 	 * @since 0.1.0
 	 */
 	public function create_popup() {
-		// we may be editing this information at any time
-		$option_data = get_option( $this->option, array() );
 		// we need the current user's ID for this case.
 		global $user_ID;
 
@@ -227,14 +221,14 @@ final class News_Match_Popup_Basics {
 				var_dump( $post_id ),
 				esc_attr( 'https://github.com/INN/newsmatch-popup-plugin/issues' )
 			);
-			$option_data['messages'][] = sprintf(
+			$messages[] = sprintf(
 				'<div id="nmpb-message" class="error"><p>%1$s</p><p>%2$s</p></div>',
 				wp_kses_post( $default_message ),
 				wp_kses_post( $details )
 			);
 
-			// update the option before exiting.
-			update_option( $this->option, $option_data );
+			// update the transient before exiting.
+			set_transient( $this->transient, $messages );
 
 			return false;
 		}
@@ -328,24 +322,19 @@ final class News_Match_Popup_Basics {
 
 		// Success!
 		// translators: %1$s is a wordpress admin URL and %2$s is the ID of the post (part of the url)
-		$messages[] = sprintf(
+		$message_parts[] = sprintf(
 			__( 'Your new default popup has been created! <a href="%1$s%2$s">Edit it now</a>.', 'news-match-popup-basics' ),
 			admin_url( 'post.php?action=edit&post=' ),
 			esc_attr( $post_id )
 		);
-		$messages[] = __( 'It is now safe to deactivate and remove the News Match Popup Basics plugin.', 'news-match-popup-basics' );
-		$this->admin_messages[] = sprintf(
+		$message_parts[] = __( 'It is now safe to deactivate and remove the News Match Popup Basics plugin.', 'news-match-popup-basics' );
+		$messages[] = sprintf(
 			'<div id="nmpb-message" class="updated notice"><p>%1$s</p></div>',
-			implode( '</p><p>', $messages )
+			implode( '</p><p>', $message_parts )
 		);
 
-		error_log(var_export( $this->admin_messages, true));
-
-		// add all messages to the admin messages queue
-		$option_data['messages'] = $this->admin_messages;
-
-		// update the option before success.
-		update_option( $this->option, $option_data );
+		// update transient before success.
+		set_transient( $this->transient, $messages );
 
 		return true;
 	}
@@ -418,21 +407,21 @@ final class News_Match_Popup_Basics {
 	}
 
 	/**
-	 * Display admin notices from the plugin's option['messages'] information
+	 * Display admin notices from the plugin's particular transient
 	 *
 	 * @since 0.1.0
 	 */
 	public function generic_admin_notices() {
-		$option_data = get_option( $this->option, array() );
-		if ( array_key_exists( 'messages', $option_data ) && ! empty( $option_data['messages'] ) ) {
-			foreach ( $option_data['messages'] as $message ) {
-				echo wp_kses_post( $message );
+		$messages = get_transient( $this->transient );
+		if ( false !== $messages && !empty ( $messages ) ) {
+			foreach ( $messages as $message ) {
+				if ( is_string( $message ) ) {
+					echo wp_kses_post( $message );
+				}
 			}
 		}
 
-		// remove messages that we have displayed
-		$option_data['messages'] = null;
-		update_option( $this->option, $option_data );
+		delete_transient( $this->transient );
 	}
 
 	/**
