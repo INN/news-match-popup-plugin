@@ -71,12 +71,12 @@ final class News_Match_Popup_Basics {
 	protected $basename = '';
 
 	/**
-	 * Detailed activation error messages.
+	 * Detailed admin messages.
 	 *
 	 * @var    array
 	 * @since  0.1.0
 	 */
-	protected $activation_errors = array();
+	protected $admin_messages = array();
 
 	/**
 	 * Singleton instance of plugin.
@@ -144,6 +144,9 @@ final class News_Match_Popup_Basics {
 			return;
 		}
 
+		// create the default popup: this plugin's goal.
+		$this->create_popup();
+
 		// Make sure any rewrite functionality has been loaded.
 		flush_rewrite_rules();
 	}
@@ -173,10 +176,6 @@ final class News_Match_Popup_Basics {
 		// Load translated strings for plugin.
 		load_plugin_textdomain( 'news-match-popup-basics', false, dirname( $this->basename ) . '/languages/' );
 
-		// create the default popup: this plugin's goal.
-		$this->create_popup();
-
-
 		// Initialize plugin classes.
 		$this->plugin_classes();
 	}
@@ -187,6 +186,151 @@ final class News_Match_Popup_Basics {
 	 * @since 0.1.0
 	 */
 	public function create_popup() {
+		// we need the current user's ID for this case.
+		global $user_ID;
+
+		// Create the post.
+		$new_post = array(
+			'post_title' => 'News Match Default Popup',
+			'post_content' => 'The text, graphics, shortcodes and links in this area are displayed in your popup.',
+			'post_status' => 'publish',
+			'post_date' => date('Y-m-d H:i:s'),
+			'post_author' => $user_ID,
+			'post_type' => 'popup',
+			'post_category' => array(0)
+		);
+		$post_id = wp_insert_post( $new_post );
+
+		// Did creating the post work?
+		if ( empty( $post_id ) || false == $post_id ) {
+			$this->admin_messages[] = sprintf(
+				// translators:
+				// %1$s is var_dumped contents of a PHP variable
+				// %2$s is https://github.com/INN/newsmatch-popup-plugin/issues
+				__( 'The post ID returned by <code>wp_insert_post</code> was <strong>%1$s</strong>: this is not right. <a href="%2$s">Please file a bug</a>.', 'news-match-popup-basics' ),
+				var_dump( $post_id ),
+				esc_attr( 'https://github.com/INN/newsmatch-popup-plugin/issues' )
+			);
+			add_action( 'all_admin_notices', array( $this, 'popup_not_created_notice' ) );
+			return false;
+		}
+
+		// to do: get the ID of an existing popup theme
+
+		// Create the post meta.
+		$meta = array(
+			// key => value
+			'popup_display' => maybe_serialize(
+				array (
+					'size' => 'large',
+					'responsive_min_width' => '',
+					'responsive_max_width' => '',
+					'custom_width' => '500',
+					'custom_height' => '380',
+					'overlay_disabled' => '1',
+					'animation_type' => 'slide',
+					'animation_speed' => '350',
+					'animation_origin' => 'center bottom',
+					'position_fixed' => '1',
+					'location' => 'center bottom',
+					'position_bottom' => '0',
+					'position_top' => '100',
+					'position_left' => '0',
+					'position_right' => '0',
+					'overlay_zindex' => '1999999998',
+					'zindex' => '1999999999',
+					'responsive_min_width_unit' => 'px',
+					'responsive_max_width_unit' => 'px',
+					'custom_width_unit' => 'px',
+					'custom_height_unit' => 'px',
+				)
+			),
+			'popup_close' => maybe_serialize(
+				array (
+					'text' => '',
+					'button_delay' => '0',
+					'overlay_click' => 'true',
+					'esc_press' => 'true',
+				)
+			),
+			'popup_title' => '',
+			'popup_teme' => null, // This should be the ID of an existing popup theme, probably the default, ack
+			'popup_triggers' => maybe_serialize(
+				array (
+					0 => 
+					array (
+						'type' => 'auto_open',
+						'settings' => 
+						array (
+							'delay' => '500',
+							'cookie' => 
+							array (
+								'name' => 
+								array (
+									0 => esc_attr( sprintf(
+										'pum-%1$s'
+										$post_id
+									) ),
+								),
+							),
+						),
+					),
+				)
+			),
+			'popup_cookies' => maybe_serialize(
+				array (
+					0 => 
+					array (
+						'event' => 'on_popup_close',
+						'settings' => 
+						array (
+							'name' => esc_attr( sprintf(
+								'pum-%1$s'
+								$post_id
+							) ),
+							'key' => '',
+							'time' => '1 year',
+							'path' => 1,
+						),
+					),
+				)
+			),
+			'popup_conditions' => maybe_serialize(
+				array (
+					0 => 
+					array (
+						0 => 
+						array (
+							'not_operand' => 0,
+							'target' => 'is_front_page',
+						),
+					),
+				)
+			),
+			'popup_open_count' => 0,
+			'popup_open_count_total' => 0,
+
+		);
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $post_id, $key, $value );
+		}
+
+		// Success!
+		// translators: %1$s is a wordpress admin URL and %2$s is the ID of the post (part of the url)
+		$this->admin_messages[] = sprintf(
+			__( 'Your new default popup has been created! <a href="%1$s%2$s">Edit it now</a>.', 'news-match-popup-basics' ),
+			admin_url( 'post.php/?action=edit&post=' ),
+			esc_attr( $post_id )
+		);
+		add_action( 'all_admin_notices', array( $this, 'popup_created_notice' ) );
+
+		error_log(var_export( $this->admin_messages, true));
+		ob_start();
+		$this->popup_created-notice();
+		$gluh = ob_get_clean();
+		error_log(var_export( $gluh, true));
+		global $wp_filter;
+		#error_log(var_export( $wp_filter, true));
 		return true;
 	}
 
@@ -239,10 +383,10 @@ final class News_Match_Popup_Basics {
 	public function meets_requirements() {
 
 		// Do checks for required classes / functions or similar.
-		// Add detailed messages to $this->activation_errors array.
+		// Add detailed messages to $this->admin_messages array.
 		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 		if ( ! is_plugin_active( 'popup-maker/popup-maker.php' ) ) {
-			$this->activation_errors[] = sprintf(
+			$this->admin_messages[] = sprintf(
 				// translators: %1$s is a wordpress.org/plugins URL, %2$s is the name of that plugin.
 				__( 'You must first install and activate the <a href="%1$s">%2$s</a> plugin.', 'news-match-popup-basics' ),
 				esc_attr( 'https://wordpress.org/plugins/popup-maker/' ),
@@ -268,16 +412,67 @@ final class News_Match_Popup_Basics {
 		$details = null;
 
 		// Add details if any exist.
-		if ( $this->activation_errors && is_array( $this->activation_errors ) ) {
+		if ( $this->admin_messages && is_array( $this->admin_messages ) ) {
 			$details = '<ul>';
-			$details .= '<li>' . implode( '</li><br /><li>', $this->activation_errors ) . '</li>';
+			$details .= '<li>' . implode( '</li><br /><li>', $this->admin_messages ) . '</li>';
 			$details .= '</ul>';
 		}
 
 		// Output errors.
 		?>
-		<div id="message" class="error">
+		<div id="nmpb-message" class="error">
 			<p><?php echo wp_kses_post( $default_message ); ?></p>
+			<?php echo wp_kses_post( $details ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Adds a notice to the dashboard if the plugin was unable to create a popup.
+	 *
+	 * @since  0.1.0
+	 */
+	public function popup_not_created_notice() {
+
+		// translators: %1$s is the link to the plugins page in the dashboard.
+		$default_message = __( 'News Match Popup Basics encountered an error while creating the default popup.', 'news-match-popup-basics' );
+
+		// Default details to null.
+		$details = null;
+
+		// Add details if any exist.
+		if ( $this->admin_messages && is_array( $this->admin_messages ) ) {
+			$details = '<ul>';
+			$details .= '<li>' . implode( '</li><br /><li>', $this->admin_messages ) . '</li>';
+			$details .= '</ul>';
+		}
+
+		// Output errors.
+		?>
+		<div id="nmpb-message" class="error">
+			<p><?php echo wp_kses_post( $default_message ); ?></p>
+			<?php echo wp_kses_post( $details ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Adds a notice to the dashboard when the popup is successfully created.
+	 *
+	 * @since  0.1.0
+	 */
+	public function popup_created_notice() {
+
+		// Add details if any exist.
+		if ( $this->admin_messages && is_array( $this->admin_messages ) ) {
+			$details = '<p>' . implode( '</p><br /><p>', $this->admin_messages ) . '</p>';
+		} else {
+			error_log(var_export( 'odd, no admin messages', true));
+		}
+
+		// Output errors.
+		?>
+		<div id="nmpb-message" class="notice">
 			<?php echo wp_kses_post( $details ); ?>
 		</div>
 		<?php
