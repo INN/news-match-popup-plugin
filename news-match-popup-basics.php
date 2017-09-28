@@ -268,7 +268,7 @@ final class News_Match_Popup_Basics {
 								'name' => 
 								array (
 									0 => esc_attr( sprintf(
-										'pum-%1$s'
+										'pum-%1$s',
 										$post_id
 									) ),
 								),
@@ -285,7 +285,7 @@ final class News_Match_Popup_Basics {
 						'settings' => 
 						array (
 							'name' => esc_attr( sprintf(
-								'pum-%1$s'
+								'pum-%1$s',
 								$post_id
 							) ),
 							'key' => '',
@@ -325,10 +325,11 @@ final class News_Match_Popup_Basics {
 		add_action( 'all_admin_notices', array( $this, 'popup_created_notice' ) );
 
 		error_log(var_export( $this->admin_messages, true));
+
 		ob_start();
-		$this->popup_created-notice();
-		$gluh = ob_get_clean();
-		error_log(var_export( $gluh, true));
+		$this->popup_created_notice();
+		error_log(var_export( ob_get_clean(), true));
+
 		global $wp_filter;
 		#error_log(var_export( $wp_filter, true));
 		return true;
