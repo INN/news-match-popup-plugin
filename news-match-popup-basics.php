@@ -334,7 +334,7 @@ final class News_Match_Popup_Basics {
 			esc_attr( $post_id )
 		);
 		$this->admin_messages[] = sprintf(
-			'<div id="nmpb-message" class="notice"><p>%1$s</p></div>',
+			'<div id="nmpb-message" class="updated notice"><p>%1$s</p></div>',
 			$message
 		);
 
