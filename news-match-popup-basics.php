@@ -179,6 +179,7 @@ final class News_Match_Popup_Basics {
 	 * @since  0.1.0
 	 */
 	public function init() {
+		add_action( 'all_admin_notices', array( $this, 'generic_admin_notices' ) );
 
 		// Bail early if requirements aren't met.
 		if ( ! $this->check_requirements() ) {
@@ -198,6 +199,8 @@ final class News_Match_Popup_Basics {
 	 * @since 0.1.0
 	 */
 	public function create_popup() {
+		// we may be editing this information at any time
+		$option_data = get_option( $this->option, array() );
 		// we need the current user's ID for this case.
 		global $user_ID;
 
@@ -213,9 +216,10 @@ final class News_Match_Popup_Basics {
 		);
 		$post_id = wp_insert_post( $new_post );
 
-		// Did creating the post work?
+		// If creating the post did not work, create an error message.
 		if ( empty( $post_id ) || false == $post_id ) {
-			$this->admin_messages[] = sprintf(
+			$default_message = __( 'News Match Popup Basics encountered an error while creating the default popup.', 'news-match-popup-basics' );
+			$details = sprintf(
 				// translators:
 				// %1$s is var_dumped contents of a PHP variable
 				// %2$s is https://github.com/INN/newsmatch-popup-plugin/issues
@@ -223,7 +227,15 @@ final class News_Match_Popup_Basics {
 				var_dump( $post_id ),
 				esc_attr( 'https://github.com/INN/newsmatch-popup-plugin/issues' )
 			);
-			add_action( 'all_admin_notices', array( $this, 'popup_not_created_notice' ) );
+			$option_data['messages'][] = sprintf(
+				'<div id="nmpb-message" class="error"><p>%1$s</p><p>%2$s</p></div>',
+				wp_kses_post( $default_message ),
+				wp_kses_post( $details )
+			);
+
+			// update the option before exiting.
+			update_option( $this->option, $option_data );
+
 			return false;
 		}
 
@@ -329,21 +341,24 @@ final class News_Match_Popup_Basics {
 
 		// Success!
 		// translators: %1$s is a wordpress admin URL and %2$s is the ID of the post (part of the url)
-		$this->admin_messages[] = sprintf(
+		$message = sprintf(
 			__( 'Your new default popup has been created! <a href="%1$s%2$s">Edit it now</a>.', 'news-match-popup-basics' ),
 			admin_url( 'post.php/?action=edit&post=' ),
 			esc_attr( $post_id )
 		);
-		add_action( 'all_admin_notices', array( $this, 'popup_created_notice' ) );
+		$this->admin_messages[] = sprintf(
+			'<div id="nmpb-message" class="notice"><p>%1$s</p></div>',
+			$message
+		);
 
 		error_log(var_export( $this->admin_messages, true));
 
-		ob_start();
-		$this->popup_created_notice();
-		error_log(var_export( ob_get_clean(), true));
+		// add all messages to the admin messages queue
+		$option_data['messages'] = $this->admin_messages;
 
-		global $wp_filter;
-		#error_log(var_export( $wp_filter, true));
+		// update the option before success.
+		update_option( $this->option, $option_data );
+
 		return true;
 	}
 
@@ -362,7 +377,7 @@ final class News_Match_Popup_Basics {
 			return true;
 		}
 
-		// Add a dashboard notice.
+		// Add a dashboard notice, the contents of which were set in check_requirements().
 		add_action( 'all_admin_notices', array( $this, 'requirements_not_met_notice' ) );
 
 		// Deactivate our plugin.
@@ -399,6 +414,9 @@ final class News_Match_Popup_Basics {
 		// Add detailed messages to $this->admin_messages array.
 		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 		if ( ! is_plugin_active( 'popup-maker/popup-maker.php' ) ) {
+
+			// We set the message here, but the action that outputs it isn't rendered in this function.
+			// Instead, the action requirements_not_met_notice is hooked inside check_requirements().
 			$this->admin_messages[] = sprintf(
 				// translators: %1$s is a wordpress.org/plugins URL, %2$s is the name of that plugin.
 				__( 'You must first install and activate the <a href="%1$s">%2$s</a> plugin.', 'news-match-popup-basics' ),
@@ -412,7 +430,27 @@ final class News_Match_Popup_Basics {
 	}
 
 	/**
+	 * Display admin notices from the plugin's option['messages'] information
+	 *
+	 * @since 0.1.0
+	 */
+	public function generic_admin_notices() {
+		$option_data = get_option( $this->option, array() );
+		if ( array_key_exists( 'messages', $option_data ) && ! empty( $option_data['messages'] ) ) {
+			foreach ( $option_data['messages'] as $message ) {
+				echo wp_kses_post( $message );
+			}
+		}
+
+		// remove messages that we have displayed
+		$option_data['messages'] = null;
+		update_option( $this->option, $option_data );
+	}
+
+	/**
 	 * Adds a notice to the dashboard if the plugin requirements are not met.
+	 *
+	 * This only affects the current page load, and needs to run before all_admin_notices.
 	 *
 	 * @since  0.1.0
 	 */
@@ -435,57 +473,6 @@ final class News_Match_Popup_Basics {
 		?>
 		<div id="nmpb-message" class="error">
 			<p><?php echo wp_kses_post( $default_message ); ?></p>
-			<?php echo wp_kses_post( $details ); ?>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Adds a notice to the dashboard if the plugin was unable to create a popup.
-	 *
-	 * @since  0.1.0
-	 */
-	public function popup_not_created_notice() {
-
-		// translators: %1$s is the link to the plugins page in the dashboard.
-		$default_message = __( 'News Match Popup Basics encountered an error while creating the default popup.', 'news-match-popup-basics' );
-
-		// Default details to null.
-		$details = null;
-
-		// Add details if any exist.
-		if ( $this->admin_messages && is_array( $this->admin_messages ) ) {
-			$details = '<ul>';
-			$details .= '<li>' . implode( '</li><br /><li>', $this->admin_messages ) . '</li>';
-			$details .= '</ul>';
-		}
-
-		// Output errors.
-		?>
-		<div id="nmpb-message" class="error">
-			<p><?php echo wp_kses_post( $default_message ); ?></p>
-			<?php echo wp_kses_post( $details ); ?>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Adds a notice to the dashboard when the popup is successfully created.
-	 *
-	 * @since  0.1.0
-	 */
-	public function popup_created_notice() {
-
-		// Add details if any exist.
-		if ( $this->admin_messages && is_array( $this->admin_messages ) ) {
-			$details = '<p>' . implode( '</p><br /><p>', $this->admin_messages ) . '</p>';
-		} else {
-			error_log(var_export( 'odd, no admin messages', true));
-		}
-
-		// Output errors.
-		?>
-		<div id="nmpb-message" class="notice">
 			<?php echo wp_kses_post( $details ); ?>
 		</div>
 		<?php
