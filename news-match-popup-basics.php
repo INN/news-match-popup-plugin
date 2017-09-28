@@ -330,7 +330,7 @@ final class News_Match_Popup_Basics {
 		// translators: %1$s is a wordpress admin URL and %2$s is the ID of the post (part of the url)
 		$message = sprintf(
 			__( 'Your new default popup has been created! <a href="%1$s%2$s">Edit it now</a>.', 'news-match-popup-basics' ),
-			admin_url( 'post.php/?action=edit&post=' ),
+			admin_url( 'post.php?action=edit&post=' ),
 			esc_attr( $post_id )
 		);
 		$this->admin_messages[] = sprintf(
