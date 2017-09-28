@@ -175,7 +175,10 @@ final class News_Match_Popup_Basics {
 	 * @since  0.1.0
 	 */
 	public function init() {
-		add_action( 'all_admin_notices', array( $this, 'generic_admin_notices' ) );
+		$var = esc_attr( $_GET['news_match_popup'] );
+		if ( 'success' === $var ) {
+			add_action( 'all_admin_notices', array( $this, 'generic_admin_notices' ) );
+		}
 
 		// Bail early if requirements aren't met.
 		if ( ! $this->check_requirements() ) {
@@ -340,6 +343,39 @@ final class News_Match_Popup_Basics {
 	}
 
 	/**
+	 * Filter the redirect to make sure that we trigger our notice on single-plugin activation
+	 *
+	 * This doesn't apply to multiple-plugin activation. I'm assuming that if someone is multi-activating, they'll multi-activate this plugin alongside Popup Maker, and its (very annoying) activation redirect will kick in, which takes the browser to a consent dialog, which takes the browser to the list of popups, which is where we wanted to send the user in the first place.
+	 * Hooray?
+	 * @link https://github.com/INN/newsmatch-popup-plugin/issues/8
+	 *
+	 * @param string $location The destination URL.
+	 * @param int $status The HTTP status code with the redirect.
+	 */
+	public function redirect_filter( $loc, $status ) {
+		if ( ! current_user_can('activate_plugins') ) {
+			return $loc;
+		}
+
+		if ( ! isset( $_GET['action'] ) || 'activate' !== $_GET['action'] ) {
+			return $loc;
+		}
+
+		// @todo: once we have a wp.org plugin slug, use that instead of the directory on ben's test computer
+		if ( ! isset( $_GET['plugin'] ) || 'newsmatch-popup-plugin/news-match-popup-basics.php' !== $_GET['plugin'] ) {
+			return $loc;
+		}
+
+		// plugin page redirect uses 302
+		if ( 302 !== $status ) {
+			return $loc;
+		}
+
+		$loc = add_query_arg( 'news_match_popup', 'success', $loc );
+		return $loc;
+	}
+
+	/**
 	 * Check if the plugin meets requirements and
 	 * disable it if they are not present.
 	 *
@@ -409,9 +445,16 @@ final class News_Match_Popup_Basics {
 	/**
 	 * Display admin notices from the plugin's particular transient
 	 *
+	 * Doesn't do anything if the case is not success.
+	 *
 	 * @since 0.1.0
 	 */
 	public function generic_admin_notices() {
+		$var = esc_attr( $_GET['news_match_popup'] );
+		if ( 'success' !== $var ) {
+			return;
+		}
+
 		$messages = get_transient( $this->transient );
 		if ( false !== $messages && !empty ( $messages ) ) {
 			foreach ( $messages as $message ) {
@@ -469,6 +512,7 @@ function nmpb() {
 
 // Kick it off.
 add_action( 'plugins_loaded', array( nmpb(), 'hooks' ) );
+add_filter( 'wp_redirect', array( nmpb(), 'redirect_filter' ), 10, 2 );
 
 // Activation and deactivation.
 register_activation_hook( __FILE__, array( nmpb(), '_activate' ) );
