@@ -79,6 +79,18 @@ final class News_Match_Popup_Basics {
 	protected $admin_messages = array();
 
 	/**
+	 * Option name for storing admin notices and other things.
+	 *
+	 * current structure:
+	 * array(
+	 *     'messages' => array() // not expected to persist beyond one page load
+	 * )
+	 * @var array
+	 * @since 0.1.0
+	 */
+	protected $option = 'news_match_popup_basics';
+
+	/**
 	 * Singleton instance of plugin.
 	 *
 	 * @var    News_Match_Popup_Basics
@@ -158,7 +170,7 @@ final class News_Match_Popup_Basics {
 	 * @since  0.1.0
 	 */
 	public function _deactivate() {
-		// Add deactivation cleanup functionality here.
+		delete_option( $this->option );
 	}
 
 	/**
