@@ -17,6 +17,22 @@ This plugin integrates with the free [Popup Maker](https://wordpress.org/plugins
 
 First, install and activate [Popup Maker](https://wordpress.org/plugins/popup-maker/). Then, install and activate this plugin.
 
+Upon activating this plugin, you should receive a notice in the WordPress plugin dashboard telling you that the plugin has been activated and a new default popup has been created. You can also check for a "News Match Default Popup" at **Popup Maker > All Popups** in the WordPress Dashboard.
+
+Once the plugin has created the default popup, you can go ahead and uninstall the plugin.
+
 == Frequently Asked Questions ==
+
+= What does this plugin do? =
+
+Upon activation, it creates a new popup with recommended default settings.
+
+= What else does it do? =
+
+Nothing. Once it's created the new popup, you can go ahead and deactivate it and remove it from your WordPress install.
+
+= Do I need to install this plugin to participate in the Knight News Match program? =
+
+No.
 
 == Changelog ==
