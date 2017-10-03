@@ -330,7 +330,6 @@ final class News_Match_Popup_Basics {
 			admin_url( 'post.php?action=edit&post=' ),
 			esc_attr( $post_id )
 		);
-		$message_parts[] = __( 'It is now safe to deactivate and remove the News Match Popup Basics plugin.', 'news-match-popup-basics' );
 		$messages[] = sprintf(
 			'<div id="nmpb-message" class="updated notice"><p>%1$s</p></div>',
 			implode( '</p><p>', $message_parts )

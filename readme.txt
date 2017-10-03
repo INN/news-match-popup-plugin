@@ -29,7 +29,6 @@ Upon activation, it creates a new popup with recommended default settings.
 
 = What else does it do? =
 
-Nothing. Once it's created the new popup, you can go ahead and deactivate it and remove it from your WordPress install.
 
 = Do I need to install this plugin to participate in the Knight News Match program? =
 
