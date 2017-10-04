@@ -71,12 +71,44 @@ final class News_Match_Popup_Basics {
 	protected $basename = '';
 
 	/**
+	 * Options page title.
+	 *
+	 * @var string
+	 * @since 0.1.1
+	 */
+	protected $title = '';
+
+	/**
 	 * Detailed admin messages.
+	 *
+	 * Used by $this->requirements_not_met_notice().
 	 *
 	 * @var    array
 	 * @since  0.1.0
 	 */
 	protected $admin_messages = array();
+
+	/**
+	 * option key and option page slug
+	 *
+	 * @var string
+	 * @since 0.1.1
+	 */
+	const KEY = 'news_match_popup_basics';
+
+	/**
+	 * slug of settings group
+	 *
+	 * @var string $settings_group The settings group slug
+	 */
+	private $settings_group = self::KEY . '_group';
+
+	/**
+	 * slug of settings section
+	 *
+	 * @var string $settings_section The settings section slug
+	 */
+	private $settings_section = self::KEY . '_section';
 
 	/**
 	 * Transient name for storing admin notices and other things.
@@ -116,6 +148,7 @@ final class News_Match_Popup_Basics {
 	protected function __construct() {
 		$this->basename = plugin_basename( __FILE__ );
 		$this->path     = plugin_dir_path( __FILE__ );
+		$this->title = esc_attr__( 'News Match Popup Basics', 'news-match-popup-basics' );
 	}
 
 	/**
@@ -139,6 +172,8 @@ final class News_Match_Popup_Basics {
 	 */
 	public function hooks() {
 		add_action( 'init', array( $this, 'init' ), 0 );
+		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_menu', array( $this, 'add_options_page' ), 999 );
 	}
 
 	/**
@@ -190,6 +225,70 @@ final class News_Match_Popup_Basics {
 
 		// Initialize plugin classes.
 		$this->plugin_classes();
+	}
+
+	/**
+	 * Register setting to WordPress
+	 *
+	 * @since 0.1.1
+	 */
+	public function register_settings() {
+		register_setting( self::KEY, self::KEY );
+
+		add_settings_section(
+			$this->settings_section,
+			esc_html__( $this->title, 'news-match-popup-basics' ),
+			array( $this, 'settings_section_callback' ),
+			self::KEY
+		);
+	}
+
+	/**
+	 * Add menu options page
+	 *
+	 * @since 0.1.1
+	 */
+	public function add_options_page() {
+		$this->options_page = add_submenu_page(
+			'edit.php?post_type=popup',
+			$this->title,
+			$this->title,
+			'manage_options',
+			self::KEY,
+			array( $this, 'admin_page_display' )
+		);
+	}
+
+	/**
+	 * Admin page markup
+	 *
+	 * @since 0.1.1
+	 */
+	public function admin_page_display() {
+		?>
+		<div class="wrap options-page <?php echo esc_attr( self::KEY ); ?>">
+			<h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
+			<form method="post" action="options.php">
+			<?php
+				settings_fields( $this->settings_group );
+				do_settings_sections( self::KEY );
+				submit_button();
+	?>
+	</form>
+</div>
+		<?php
+	}
+
+	/**
+	 * Settings section display
+	 *
+	 * @since 0.1.1
+	 */
+	public function settings_section_callback() {
+		echo wp_kses_post( sprintf(
+			'<p>%1$s</p>',
+			__( 'This page controls modifications that News Match Popup Basics plugin makes to Popup Maker popups on your site.', 'news-match-popup-basics' )
+		));
 	}
 
 	/**
@@ -319,8 +418,8 @@ final class News_Match_Popup_Basics {
 			'popup_open_count_total' => 0,
 
 		);
-		foreach ( $meta as $key => $value ) {
-			update_post_meta( $post_id, $key, $value );
+		foreach ( $meta as $k => $v ) {
+			update_post_meta( $post_id, $k, $v );
 		}
 
 		// Success!
