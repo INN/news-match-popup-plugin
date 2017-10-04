@@ -71,14 +71,6 @@ final class News_Match_Popup_Basics {
 	protected $basename = '';
 
 	/**
-	 * Options page title.
-	 *
-	 * @var string
-	 * @since 0.1.1
-	 */
-	protected $title = '';
-
-	/**
 	 * Detailed admin messages.
 	 *
 	 * Used by $this->requirements_not_met_notice().
@@ -95,13 +87,6 @@ final class News_Match_Popup_Basics {
 	 * @since 0.1.1
 	 */
 	const KEY = 'news_match_popup_basics';
-
-	/**
-	 * slug of settings group
-	 *
-	 * @var string $settings_group The settings group slug
-	 */
-	private $settings_group = self::KEY . '_group';
 
 	/**
 	 * slug of settings section
@@ -127,6 +112,13 @@ final class News_Match_Popup_Basics {
 	protected static $single_instance = null;
 
 	/**
+	 * The settings page and suchlike
+	 *
+	 * @since 0.1.1
+	 */
+	private $settings = null;
+
+	/**
 	 * Creates or returns an instance of this class.
 	 *
 	 * @since   0.1.0
@@ -148,7 +140,10 @@ final class News_Match_Popup_Basics {
 	protected function __construct() {
 		$this->basename = plugin_basename( __FILE__ );
 		$this->path     = plugin_dir_path( __FILE__ );
-		$this->title = esc_attr__( 'News Match Popup Basics', 'news-match-popup-basics' );
+
+		// Initialize the settings.
+		require_once( $this->path . '/classes/class-news_match_popup_basics_settings.php' );
+		$this->mailchimp = new News_Match_Popup_Basics_Mailchimp( self::KEY );
 	}
 
 	/**
@@ -159,7 +154,7 @@ final class News_Match_Popup_Basics {
 	public function plugin_classes() {
 		// $this->plugin_class = new NMPB_Plugin_Class( $this );
 
-	} // END OF PLUGIN CLASSES FUNCTION
+	}
 
 	/**
 	 * Add hooks and filters.
@@ -172,8 +167,6 @@ final class News_Match_Popup_Basics {
 	 */
 	public function hooks() {
 		add_action( 'init', array( $this, 'init' ), 0 );
-		add_action( 'admin_init', array( $this, 'register_settings' ) );
-		add_action( 'admin_menu', array( $this, 'add_options_page' ), 999 );
 	}
 
 	/**
@@ -228,73 +221,10 @@ final class News_Match_Popup_Basics {
 	}
 
 	/**
-	 * Register setting to WordPress
-	 *
-	 * @since 0.1.1
-	 */
-	public function register_settings() {
-		register_setting( self::KEY, self::KEY );
-
-		add_settings_section(
-			$this->settings_section,
-			esc_html__( $this->title, 'news-match-popup-basics' ),
-			array( $this, 'settings_section_callback' ),
-			self::KEY
-		);
-	}
-
-	/**
-	 * Add menu options page
-	 *
-	 * @since 0.1.1
-	 */
-	public function add_options_page() {
-		$this->options_page = add_submenu_page(
-			'edit.php?post_type=popup',
-			$this->title,
-			$this->title,
-			'manage_options',
-			self::KEY,
-			array( $this, 'admin_page_display' )
-		);
-	}
-
-	/**
-	 * Admin page markup
-	 *
-	 * @since 0.1.1
-	 */
-	public function admin_page_display() {
-		?>
-		<div class="wrap options-page <?php echo esc_attr( self::KEY ); ?>">
-			<h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
-			<form method="post" action="options.php">
-			<?php
-				settings_fields( $this->settings_group );
-				do_settings_sections( self::KEY );
-				submit_button();
-	?>
-	</form>
-</div>
-		<?php
-	}
-
-	/**
-	 * Settings section display
-	 *
-	 * @since 0.1.1
-	 */
-	public function settings_section_callback() {
-		echo wp_kses_post( sprintf(
-			'<p>%1$s</p>',
-			__( 'This page controls modifications that News Match Popup Basics plugin makes to Popup Maker popups on your site.', 'news-match-popup-basics' )
-		));
-	}
-
-	/**
 	 * Create a new popup post with our desired defaults
 	 *
 	 * @since 0.1.0
+	 * @todo split this into its own class, please
 	 */
 	public function create_popup() {
 		// we need the current user's ID for this case.
