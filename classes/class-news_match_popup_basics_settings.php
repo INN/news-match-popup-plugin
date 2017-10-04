@@ -63,7 +63,7 @@ class News_Match_Popup_Basics_Mailchimp {
 	 * @todo sanitize settings
 	 */
 	public function register_settings() {
-		register_setting( $this->key, $this->key );
+		register_setting( $this->key, $this->key, array( $this, 'setting_sanitizer' ) );
 
 		add_settings_section(
 			$this->settings_section,
@@ -72,12 +72,128 @@ class News_Match_Popup_Basics_Mailchimp {
 			$this->key
 		);
 
-		/*
 		add_settings_field(
-			$this->key
+			$this->key . '[mailchimp_toggle]',
+			__( 'Enable Mailchimp-based popup prevention?', 'news-match-popup-basics' ),
+			array( $this, 'mailchimp_toggle' ),
+			$this->key,
+			$this->settings_section
 		);
-		*/
+
+		add_settings_field(
+			$this->key . '[mailchimp_campaign]',
+			__( 'Mailchimp campaign ID', 'news-match-popup-basics' ),
+			array( $this, 'mailchimp_campaign' ),
+			$this->key,
+			$this->settings_section
+		);
+
+		add_settings_field(
+			$this->key . '[donate_toggle]',
+			__( 'Enable Mailchimp-based popup prevention?', 'news-match-popup-basics' ),
+			array( $this, 'donate_toggle' ),
+			$this->key,
+			$this->settings_section
+		);
+
+		add_settings_field(
+			$this->key . '[donate_urls]',
+			__( 'Donation Page URLs', 'news-match-popup-basics' ),
+			array( $this, 'donate_urls' ),
+			$this->key,
+			$this->settings_section
+		);
+
 		return true;
+	}
+
+	/**
+	 * @todo
+	 * Gather the settings values from the $_POST
+	 * clean them up
+	 * save them in the db
+	 */
+	public function settings_sanitizer( $value ) {
+		error_log(var_export( $value, true));
+		return $value;
+	}
+
+	/**
+	 * Display the checkbox for toggling whether the plugin suppresses based on mailchimp campaign ID in the URL
+	 *
+	 * @since 0.1.1
+	 * @param array $args Optional arguments passed to callbacks registered with add_settings_field.
+	 */
+	public function mailchimp_toggle() {
+		$option = get_option( $this->key, array() );
+		if ( ! isset( $option['mailchimp_toggle'] ) || 'on' !== $option['mailchimp_toggle'] ) {
+			$value = false;
+		} else {
+			$value = 'on';
+		}
+
+		echo sprintf(
+			'<input name="%1$s" id="%1$s[mailchimp_toggle]" type="checkbox" value="on" %2$s>',
+			$this->key,
+			checked( $value, 'on', false )
+		);
+	}
+	
+	/**
+	 * Display text input for mailchimp campaign ID
+	 *
+	 * @since 0.1.1
+	 * @param array $args Optional arguments passed to callbacks registered with add_settings_field.
+	 */
+	public function mailchimp_campaign( $args ) {
+		$option = get_option( $this->key, array() );
+		if ( ! isset( $option['mailchimp_campaign'] ) || empty( $option['mailchimp_campaign'] ) ) {
+			$value = '';
+		} else {
+			$value = esc_attr( $option['mailchimp_campaign'] );
+		}
+
+		echo sprintf(
+			'<p><code>/utm_source=</code><input name="%1$s" id="%1$s[mailchimp_campign]" type="text" value="%2$s"></p>',
+			$this->key,
+			$value
+		);
+		echo sprintf(
+			'<p>%1$s</p>',
+			__( 'The campaign name can be found by examining outbound links from your Mailchimp newsletter, then carefully copying everything between <code>utm_source=</code> and <code>&amp;</code>.', 'news-match-popup-basics' )
+		);
+
+	}
+
+	/**
+	 * Display the checkbox for toggling whether the plugin suppresses based on donate page URLs
+	 *
+	 * @since 0.1.1
+	 * @param array $args Optional arguments passed to callbacks registered with add_settings_field.
+	 */
+	public function donate_toggle( $args ) {
+		$option = get_option( $this->key, array() );
+		if ( ! isset( $option['donate_toggle'] ) || 'on' !== $option['donate_toggle'] ) {
+			$value = false;
+		} else {
+			$value = 'on';
+		}
+
+		echo sprintf(
+			'<input name="%1$s" id="%1$s[donate_toggle]" type="checkbox" value="on" %2$s>',
+			$this->key,
+			checked( $value, 'on', false )
+		);
+	}
+
+	/**
+	 * Display text area input for donation page URLs where the mailchimp popup should not appear
+	 *
+	 * @todo: can this be done with better page targeting in the default plugin?
+	 * 		- no, "NOT" targeting requires purchasing an additional plugin extension.
+	 * @since 0.1.1
+	 */
+	public function donate_urls() {
 	}
 
 	/**
@@ -107,6 +223,7 @@ class News_Match_Popup_Basics_Mailchimp {
 			array( $this, 'admin_page_display' )
 		);
 	}
+
 	/**
 	 * Admin page markup
 	 *
