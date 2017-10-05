@@ -296,7 +296,7 @@ final class News_Match_Popup_Basics {
 					'type' => 'auto_open',
 					'settings' =>
 					array (
-						'delay' => '500',
+						'delay' => '25000',
 						'cookie' =>
 						array (
 							'name' =>
