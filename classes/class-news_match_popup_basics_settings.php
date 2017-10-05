@@ -106,7 +106,7 @@ class News_Match_Popup_Basics_Mailchimp {
 
 		add_settings_field(
 			$this->key . '[donate_urls]',
-			__( 'Donation Page URLs', 'news-match-popup-basics' ),
+			__( 'Donation page URLs', 'news-match-popup-basics' ),
 			array( $this, 'donate_urls' ),
 			$this->key,
 			$this->settings_section,
@@ -265,23 +265,21 @@ class News_Match_Popup_Basics_Mailchimp {
 		if ( ! isset( $option['donate_urls'] ) || empty( $option['donate_urls'] ) ) {
 			$value = '';
 		} else {
-			$value = esc_attr( $option['donate_urls'] );
+			$value = wp_kses_post( $option['donate_urls'] );
 		}
 
 		echo sprintf(
-			'<textarea name="%1$s" id="%1$s" type="checkbox" value="on" %2$s wrap="off" style="width: 100%%; display: block;"></textarea>',
+			'<textarea name="%1$s" id="%1$s" type="checkbox" wrap="off" style="width: 100%%; display: block;">%2$s</textarea>',
 			esc_attr( $args['name'] ),
-			checked( $value, 'on', false )
+			$value
 		);
 
-		// reminder to remove https://example.org .
-		echo  '<label for="' . esc_attr( $args['name'] ) . '">';
+		// reminder to remove http(s)?:// .
 		echo sprintf(
-			// translators: %1$s is the current site's URL, in the form https://example.com .
-			__( 'Each URL should be entered on a separate line. Please remove the opening %1$s from the URL, as it is not needed in this context.', 'news-match-popup-basics' ),
-			esc_html( site_url() )
+			'<label for="%1$s">%2$s</label>',
+			esc_attr( $args['name'] ),
+			__( 'Each URL should be entered on a separate line. Please remove the opening <code>https://</code> or <code>http://</code> from the URL, as it is not needed in this context.', 'news-match-popup-basics' )
 		);
-		echo  '</label>';
 	}
 
 	/**
@@ -330,16 +328,4 @@ class News_Match_Popup_Basics_Mailchimp {
 		</div>
 		<?php
 	}
-
-	/**
-	 * forms
-	 */
-
-	/**
-	 * verification of submission
-	 */
-
-	/**
-	 * modify the things/output the js
-	 */
 }
