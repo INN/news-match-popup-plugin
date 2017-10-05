@@ -60,10 +60,9 @@ class News_Match_Popup_Basics_Mailchimp {
 	 * The settings section and settings group and option name were all registered in the save
 	 *
 	 * @since 0.1.1
-	 * @todo sanitize settings
 	 */
 	public function register_settings() {
-		register_setting( $this->key, $this->key, array( $this, 'setting_sanitizer' ) );
+		register_setting( $this->key, $this->key, array( $this, 'settings_sanitizer' ) );
 
 		add_settings_section(
 			$this->settings_section,
@@ -128,8 +127,50 @@ class News_Match_Popup_Basics_Mailchimp {
 	 * save them in the db
 	 */
 	public function settings_sanitizer( $value ) {
+		$new_settings = array();
+		if ( isset( $value['mailchimp_toggle'] )  && ! empty( $value['mailchimp_toggle'] ) ) {
+			if ( 'on' === $value['mailchimp_toggle'] ) {
+				$new_settings['mailchimp_toggle'] = 'on';
+			}
+		}
+		if ( isset( $value['mailchimp_campaign'] )  && ! empty( $value['mailchimp_campaign'] ) ) {
+			$new_settings['mailchimp_campaign'] = esc_url( $value['mailchimp_toggle'] );
+		}
+		if ( isset( $value['donate_toggle'] )  && ! empty( $value['donate_toggle'] ) ) {
+			if ( 'on' === $value['donate_toggle'] ) {
+				$new_settings['donate_toggle'] = 'on';
+			}
+		}
+		if ( isset( $value['donate_urls'] )  && ! empty( $value['donate_urls'] ) ) {
+			$potential_urls = explode( PHP_EOL, $value['donate_urls'] );
+			foreach ( $potential_urls as $url ) {
+				$new_urls[] = $this->remove_protocol_from_url( $url );
+			}
+
+			$new_settings['donate_urls'] = implode( PHP_EOL, $new_urls );
+		}
 		error_log(var_export( $value, true));
 		return $value;
+	}
+
+	/**
+	 * Function to strip the frontmatter from a URL
+	 *
+	 * @return string The URL without the protocol or domain name
+	 * @since 0.1.1
+	 * @todo this isn't cleaning right
+	 */
+	public function remove_protocol_from_url( $url ) {
+		// remove protocol
+		return preg_replace( '/^http(s)?:/\/\//', '', $url );
+
+		/*
+		 * test material
+		https://foo.bar/donate/
+		http://foo.bar/donate/
+		/donate/
+		foo.bar/donatehttp:/
+		*/
 	}
 
 	/**
