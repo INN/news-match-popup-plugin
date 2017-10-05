@@ -272,7 +272,7 @@ class News_Match_Popup_Basics_Mailchimp {
 		echo sprintf(
 			'<label for="%1$s">%2$s</label>',
 			esc_attr( $args['name'] ),
-			__( 'Each URL should be entered on a separate line. Please remove the opening <code>https://</code> or <code>http://</code> from the URL, as it is not needed in this context.', 'news-match-popup-basics' )
+			__( 'Each URL should be entered on a separate line. Please remove the opening <code>https://</code> or <code>http://</code> from the URL, as it is not needed in this context. You can also provide URL fragments such as <code>/donate/</code> to hit both <code>example.org/donate/</code> and <code>example.org/about-us/donate</code>.', 'news-match-popup-basics' )
 		);
 	}
 
