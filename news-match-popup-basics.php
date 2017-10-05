@@ -140,20 +140,13 @@ final class News_Match_Popup_Basics {
 	protected function __construct() {
 		$this->basename = plugin_basename( __FILE__ );
 		$this->path     = plugin_dir_path( __FILE__ );
+		$this->url     = plugin_dir_url( __FILE__ );
 
 		// Initialize the settings.
 		require_once( $this->path . '/classes/class-news_match_popup_basics_settings.php' );
-		$this->mailchimp = new News_Match_Popup_Basics_Mailchimp( self::KEY );
-	}
-
-	/**
-	 * Attach other plugin classes to the base plugin class.
-	 *
-	 * @since  0.1.0
-	 */
-	public function plugin_classes() {
-		// $this->plugin_class = new NMPB_Plugin_Class( $this );
-
+		require_once( $this->path . '/classes/class-news_match_popup_basics_mailchimp.php' );
+		$this->settings = new News_Match_Popup_Basics_Settings( self::KEY );
+		$this->mailchimp = new News_Match_Popup_Basics_Mailchimp( self::KEY, $this->url );
 	}
 
 	/**
@@ -215,9 +208,6 @@ final class News_Match_Popup_Basics {
 
 		// Load translated strings for plugin.
 		load_plugin_textdomain( 'news-match-popup-basics', false, dirname( $this->basename ) . '/languages/' );
-
-		// Initialize plugin classes.
-		$this->plugin_classes();
 	}
 
 	/**

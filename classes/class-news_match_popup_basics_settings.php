@@ -6,7 +6,7 @@
  * @package News_Match_Popup_Basics
  */
 
-class News_Match_Popup_Basics_Mailchimp {
+class News_Match_Popup_Basics_Settings {
 	/**
 	 * option key and option page slug
 	 *
@@ -136,7 +136,7 @@ class News_Match_Popup_Basics_Mailchimp {
 		}
 
 		if ( isset( $value['mailchimp_campaign'] )  && ! empty( $value['mailchimp_campaign'] ) ) {
-			$new_settings['mailchimp_campaign'] = esc_url( $value['mailchimp_toggle'] );
+			$new_settings['mailchimp_campaign'] = esc_attr( $value['mailchimp_campaign'] );
 		}
 
 		if ( isset( $value['donate_toggle'] )  && ! empty( $value['donate_toggle'] ) ) {
