@@ -46,10 +46,10 @@ class News_Match_Popup_Basics_Mailchimp {
 	public function __construct( $settings_key ) {
 		$this->key = $settings_key;
 		$this->settings_section = $settings_key . '_section';
-		$this->settings_group = $settings_key . '_group';
+		$this->settings_group = $settings_key; // the same because of https://core.trac.wordpress.org/ticket/7277 .
 		$this->title = esc_attr__( 'News Match Popup Basics', 'news-match-popup-basics' );
 
-		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_init', array( $this, 'register_settings' ), 10 );
 		add_action( 'admin_menu', array( $this, 'add_options_page' ), 999 );
 	}
 
@@ -285,8 +285,8 @@ class News_Match_Popup_Basics_Mailchimp {
 				do_settings_sections( $this->key );
 				submit_button();
 	?>
-	</form>
-</div>
+			</form>
+		</div>
 		<?php
 	}
 
