@@ -74,10 +74,13 @@ class News_Match_Popup_Basics_Mailchimp {
 
 		add_settings_field(
 			$this->key . '[mailchimp_toggle]',
-			__( 'Enable Mailchimp-based popup prevention?', 'news-match-popup-basics' ),
+			__( 'Popup prevention for Mailchimp visitors', 'news-match-popup-basics' ),
 			array( $this, 'mailchimp_toggle' ),
 			$this->key,
-			$this->settings_section
+			$this->settings_section,
+			array(
+				'name' => $this->key . '[mailchimp_toggle]'
+			)
 		);
 
 		add_settings_field(
@@ -85,15 +88,21 @@ class News_Match_Popup_Basics_Mailchimp {
 			__( 'Mailchimp campaign ID', 'news-match-popup-basics' ),
 			array( $this, 'mailchimp_campaign' ),
 			$this->key,
-			$this->settings_section
+			$this->settings_section,
+			array(
+				'name' => $this->key . '[mailchimp_campaign]'
+			)
 		);
 
 		add_settings_field(
 			$this->key . '[donate_toggle]',
-			__( 'Enable Mailchimp-based popup prevention?', 'news-match-popup-basics' ),
+			__( 'Donation page popup prevention', 'news-match-popup-basics' ),
 			array( $this, 'donate_toggle' ),
 			$this->key,
-			$this->settings_section
+			$this->settings_section,
+			array(
+				'name' => $this->key . '[donate_toggle]'
+			)
 		);
 
 		add_settings_field(
@@ -101,11 +110,16 @@ class News_Match_Popup_Basics_Mailchimp {
 			__( 'Donation Page URLs', 'news-match-popup-basics' ),
 			array( $this, 'donate_urls' ),
 			$this->key,
-			$this->settings_section
+			$this->settings_section,
+			array(
+				'name' => $this->key . '[donate_urls]'
+			)
 		);
 
 		return true;
 	}
+
+	// @todo: clean these up so they have proper labels
 
 	/**
 	 * @todo
@@ -124,7 +138,7 @@ class News_Match_Popup_Basics_Mailchimp {
 	 * @since 0.1.1
 	 * @param array $args Optional arguments passed to callbacks registered with add_settings_field.
 	 */
-	public function mailchimp_toggle() {
+	public function mailchimp_toggle( $args ) {
 		$option = get_option( $this->key, array() );
 		if ( ! isset( $option['mailchimp_toggle'] ) || 'on' !== $option['mailchimp_toggle'] ) {
 			$value = false;
@@ -133,9 +147,14 @@ class News_Match_Popup_Basics_Mailchimp {
 		}
 
 		echo sprintf(
-			'<input name="%1$s" id="%1$s[mailchimp_toggle]" type="checkbox" value="on" %2$s>',
-			$this->key,
+			'<input name="%1$s" id="%1$s" type="checkbox" value="on" %2$s>',
+			$args['name'],
 			checked( $value, 'on', false )
+		);
+		echo sprintf(
+			'<label for="%2$s">%1$s</label>',
+			__( 'Checking this box will prevent popups containing a Mailchimp signup form with the HTML element ID <code>#mc_embed_signup</code> from appearing when visiting your site at a link with a <code>utm_source</code> parameter matching the one entered in the box below.', 'news-match-popup-basics' ),
+			$args['name']
 		);
 	}
 	
@@ -154,13 +173,14 @@ class News_Match_Popup_Basics_Mailchimp {
 		}
 
 		echo sprintf(
-			'<p><code>/utm_source=</code><input name="%1$s" id="%1$s[mailchimp_campign]" type="text" value="%2$s"></p>',
-			$this->key,
+			'<p><code>utm_source=</code><input name="%1$s" id="%1$s" type="text" value="%2$s"></p>',
+			esc_attr( $args['name'] ),
 			$value
 		);
 		echo sprintf(
-			'<p>%1$s</p>',
-			__( 'The campaign name can be found by examining outbound links from your Mailchimp newsletter, then carefully copying everything between <code>utm_source=</code> and <code>&amp;</code>.', 'news-match-popup-basics' )
+			'<label for="%2$s">%1$s</label>',
+			__( 'The campaign name can be found by examining outbound links from your Mailchimp newsletter, then carefully copying everything between <code>utm_source=</code> and <code>&amp;</code>.', 'news-match-popup-basics' ),
+			esc_attr( $args['name'] )
 		);
 
 	}
@@ -180,9 +200,14 @@ class News_Match_Popup_Basics_Mailchimp {
 		}
 
 		echo sprintf(
-			'<input name="%1$s" id="%1$s[donate_toggle]" type="checkbox" value="on" %2$s>',
-			$this->key,
+			'<input name="%1$s" id="%1$s" type="checkbox" value="on" %2$s>',
+			esc_attr( $args['name'] ),
 			checked( $value, 'on', false )
+		);
+		echo sprintf(
+			'<label for="%2$s">%1$s</label>',
+			__( 'Checking this box will prevent the popup from appearing on pages with URLs matching the URLs entered in the box below.', 'news-match-popup-basics' ),
+			$args['name']
 		);
 	}
 
@@ -191,9 +216,31 @@ class News_Match_Popup_Basics_Mailchimp {
 	 *
 	 * @todo: can this be done with better page targeting in the default plugin?
 	 * 		- no, "NOT" targeting requires purchasing an additional plugin extension.
+	 * @todo: better sanitizing of this on this side, not on the submit side
 	 * @since 0.1.1
 	 */
-	public function donate_urls() {
+	public function donate_urls( $args ) {
+		$option = get_option( $this->key, array() );
+		if ( ! isset( $option['donate_urls'] ) || empty( $option['donate_urls'] ) ) {
+			$value = '';
+		} else {
+			$value = esc_attr( $option['donate_urls'] );
+		}
+
+		echo sprintf(
+			'<textarea name="%1$s" id="%1$s" type="checkbox" value="on" %2$s wrap="off" style="width: 100%%; display: block;"></textarea>',
+			esc_attr( $args['name'] ),
+			checked( $value, 'on', false )
+		);
+
+		// reminder to remove https://example.org .
+		echo  '<label for="' . esc_attr( $args['name'] ) . '">';
+		echo sprintf(
+			// translators: %1$s is the current site's URL, in the form https://example.com .
+			__( 'Each URL should be entered on a separate line. Please remove the opening %1$s from the URL, as it is not needed in this context.', 'news-match-popup-basics' ),
+			esc_html( site_url() )
+		);
+		echo  '</label>';
 	}
 
 	/**
