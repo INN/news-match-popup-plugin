@@ -3,7 +3,7 @@
  * Plugin Name: News Match Popup Basics
  * Plugin URI:  https://labs.inn.org
  * Description: An introduction to popups for Knight News Match program particpants, and others
- * Version:     0.1.0
+ * Version:     0.1.1
  * Author:      innlabs
  * Author URI:  https://labs.inn.org
  * Donate link: https://labs.inn.org
@@ -14,7 +14,7 @@
  * @link    https://labs.inn.org
  *
  * @package News_Match_Popup_Basics
- * @version 0.1.0
+ * @version 0.1.1
  */
 
 /**
@@ -52,7 +52,7 @@ final class News_Match_Popup_Basics {
 	 * @var    string
 	 * @since  0.1.0
 	 */
-	const VERSION = '0.1.0';
+	const VERSION = '0.1.1';
 
 	/**
 	 * Path of plugin directory.
@@ -73,10 +73,27 @@ final class News_Match_Popup_Basics {
 	/**
 	 * Detailed admin messages.
 	 *
+	 * Used by $this->requirements_not_met_notice().
+	 *
 	 * @var    array
 	 * @since  0.1.0
 	 */
 	protected $admin_messages = array();
+
+	/**
+	 * option key and option page slug
+	 *
+	 * @var string
+	 * @since 0.1.1
+	 */
+	const KEY = 'news_match_popup_basics';
+
+	/**
+	 * slug of settings section
+	 *
+	 * @var string $settings_section The settings section slug
+	 */
+	private $settings_section = self::KEY . '_section';
 
 	/**
 	 * Transient name for storing admin notices and other things.
@@ -93,6 +110,13 @@ final class News_Match_Popup_Basics {
 	 * @since  0.1.0
 	 */
 	protected static $single_instance = null;
+
+	/**
+	 * The settings page and suchlike
+	 *
+	 * @since 0.1.1
+	 */
+	private $settings = null;
 
 	/**
 	 * Creates or returns an instance of this class.
@@ -116,17 +140,14 @@ final class News_Match_Popup_Basics {
 	protected function __construct() {
 		$this->basename = plugin_basename( __FILE__ );
 		$this->path     = plugin_dir_path( __FILE__ );
+		$this->url     = plugin_dir_url( __FILE__ );
+
+		// Initialize the settings.
+		require_once( $this->path . '/classes/class-news_match_popup_basics_settings.php' );
+		require_once( $this->path . '/classes/class-news_match_popup_basics_mailchimp.php' );
+		$this->settings = new News_Match_Popup_Basics_Settings( self::KEY );
+		$this->mailchimp = new News_Match_Popup_Basics_Mailchimp( self::KEY, $this->url );
 	}
-
-	/**
-	 * Attach other plugin classes to the base plugin class.
-	 *
-	 * @since  0.1.0
-	 */
-	public function plugin_classes() {
-		// $this->plugin_class = new NMPB_Plugin_Class( $this );
-
-	} // END OF PLUGIN CLASSES FUNCTION
 
 	/**
 	 * Add hooks and filters.
@@ -187,15 +208,13 @@ final class News_Match_Popup_Basics {
 
 		// Load translated strings for plugin.
 		load_plugin_textdomain( 'news-match-popup-basics', false, dirname( $this->basename ) . '/languages/' );
-
-		// Initialize plugin classes.
-		$this->plugin_classes();
 	}
 
 	/**
 	 * Create a new popup post with our desired defaults
 	 *
 	 * @since 0.1.0
+	 * @todo split this into its own class, please
 	 */
 	public function create_popup() {
 		// we need the current user's ID for this case.
@@ -277,7 +296,7 @@ final class News_Match_Popup_Basics {
 					'type' => 'auto_open',
 					'settings' =>
 					array (
-						'delay' => '500',
+						'delay' => '25000',
 						'cookie' =>
 						array (
 							'name' =>
@@ -319,8 +338,8 @@ final class News_Match_Popup_Basics {
 			'popup_open_count_total' => 0,
 
 		);
-		foreach ( $meta as $key => $value ) {
-			update_post_meta( $post_id, $key, $value );
+		foreach ( $meta as $k => $v ) {
+			update_post_meta( $post_id, $k, $v );
 		}
 
 		// Success!
@@ -330,7 +349,6 @@ final class News_Match_Popup_Basics {
 			admin_url( 'post.php?action=edit&post=' ),
 			esc_attr( $post_id )
 		);
-		$message_parts[] = __( 'It is now safe to deactivate and remove the News Match Popup Basics plugin.', 'news-match-popup-basics' );
 		$messages[] = sprintf(
 			'<div id="nmpb-message" class="updated notice"><p>%1$s</p></div>',
 			implode( '</p><p>', $message_parts )
