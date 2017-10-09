@@ -241,7 +241,7 @@ class News_Match_Popup_Basics_Settings {
 		);
 		echo sprintf(
 			'<label for="%2$s">%1$s</label>',
-			__( 'Checking this box will prevent the popup from appearing on pages with URLs matching the URLs entered in the box below.', 'news-match-popup-basics' ),
+			__( 'Checking this box will prevent <strong>all</strong> Popup Maker popups from appearing on pages with URLs matching the URLs entered in the box below.', 'news-match-popup-basics' ),
 			$args['name']
 		);
 	}
