@@ -160,6 +160,8 @@ final class News_Match_Popup_Basics {
 		require_once( $this->path . '/classes/class-news-match-popup-basics-mailchimp.php' );
 		require_once( $this->path . '/classes/class-news-match-popup-basics-url-exclude.php' );
 		$this->settings = new News_Match_Popup_Basics_Settings( self::KEY );
+
+		// Do these always need to be created? They aren't used on admin pages.
 		$this->mailchimp = new News_Match_Popup_Basics_Mailchimp( self::KEY, $this->url );
 		$this->excluder = new News_Match_Popup_Basics_Url_Exclude( self::KEY );
 	}
@@ -211,16 +213,16 @@ final class News_Match_Popup_Basics {
 	 * @since  0.1.0
 	 */
 	public function init() {
-		// not processing nonce here because ...?
-		// we don't set a nonce in the redirect
-		$var = esc_attr( wp_unslash( $_GET['news_match_popup'] ) );
-		if ( 'success' === $var ) {
-			add_action( 'all_admin_notices', array( $this, 'generic_admin_notices' ) );
-		}
 
 		// Bail early if requirements aren't met.
 		if ( ! $this->check_requirements() ) {
 			return;
+		}
+
+		// not checking nonce at this point because the enqueued function will check the nonce before doing anything.
+		$var = esc_attr( wp_unslash( $_GET['news_match_popup'] ) );
+		if ( 'success' === $var ) {
+			add_action( 'all_admin_notices', array( $this, 'generic_admin_notices' ) );
 		}
 
 		// Load translated strings for plugin.
@@ -234,7 +236,7 @@ final class News_Match_Popup_Basics {
 	 * @todo split this into its own class, please
 	 */
 	public function create_popup() {
-		// we need the current user's ID for this case.
+		// we need the current user's ID for this case. WordPress's PHP_CodeSniffer rules complain that this variable is not in snake_case; it's a WordPress global variable so ignore that rule.
 		global $user_ID;
 
 		// Create the post.
@@ -245,7 +247,7 @@ final class News_Match_Popup_Basics {
 			'post_date' => date( 'Y-m-d H:i:s' ),
 			'post_author' => $user_ID,
 			'post_type' => 'popup',
-			'post_category' => array( 0 )
+			'post_category' => array( 0 ),
 		);
 		$post_id = wp_insert_post( $new_post );
 
@@ -376,37 +378,45 @@ final class News_Match_Popup_Basics {
 	}
 
 	/**
-	 * Filter the redirect to make sure that we trigger our notice on single-plugin activation
+	 * Filter the redirect to make sure that we trigger our notice on single-plugin activation.
 	 *
-	 * This doesn't apply to multiple-plugin activation. I'm assuming that if someone is multi-activating, they'll multi-activate this plugin alongside Popup Maker, and its (very annoying) activation redirect will kick in, which takes the browser to a consent dialog, which takes the browser to the list of popups, which is where we wanted to send the user in the first place.
+	 * We're adding a query arg and a nonce to the redirect URL query, and that arg and nonce are checked by the function in our plugin that's looking for them, generic_admin_notices.
+	 *
+	 * Is it noncing necessary here? I have questions about whether noncing this is even possible, because the URL at this point is the activation URL from the plugins list, and the plugin can't modify that before it's been activated. At the point that this filter runs during the activation process, the plugin has already been activated, and because nonces are used once, we can't use that nonce. There are no nonces available to this plugin to verify before looking at $_GET.
+	 *
+	 * This filter doesn't apply to multiple-plugin activation. I'm assuming that if someone is multi-activating, they'll multi-activate this plugin alongside Popup Maker, and its (very annoying) activation redirect will kick in, which takes the browser to a consent dialog, which takes the browser to the list of popups, which is where we wanted to send the user in the first place.
 	 * Hooray?
 	 *
 	 * @link https://github.com/INN/newsmatch-popup-plugin/issues/8
-	 * @param string $locn The destination URL.
-	 * @param int $status The HTTP status code with the redirect.
+	 * @param string $loc The destination URL.
+	 * @param int    $status The HTTP status code with the redirect.
 	 */
 	public function redirect_filter( $loc, $status ) {
 		if ( ! current_user_can( 'activate_plugins' ) ) {
 			return $loc;
 		}
 
+		// check if we're activating a plugin.
 		if ( ! isset( $_GET['action'] ) || 'activate' !== $_GET['action'] ) {
 			return $loc;
 		}
-
-		// is there even a nonce when activating?
 
 		// @todo: once we have a wp.org plugin slug, use that instead of the directory on ben's test computer
 		if ( ! isset( $_GET['plugin'] ) || 'newsmatch-popup-plugin/news-match-popup-basics.php' !== $_GET['plugin'] ) {
 			return $loc;
 		}
 
-		// plugin page redirect uses 302.
+		// Plugin page redirect uses 302, and we want to only run then.
 		if ( 302 !== $status ) {
 			return $loc;
 		}
 
+		// Add the plugin's success parameter to the redirect URL.
 		$loc = add_query_arg( 'news_match_popup', 'success', $loc );
+
+		// Add nonce.
+		$loc = html_entity_decode( wp_nonce_url( $loc, 'nmpp-success' ) ); // wp_nonce_url escapes for display and there's no way to turn that off.
+
 		return $loc;
 	}
 
@@ -485,7 +495,11 @@ final class News_Match_Popup_Basics {
 	 * @since 0.1.0
 	 */
 	public function generic_admin_notices() {
-		// @todo nonces.
+		// nonce set in $this->redirect_filter() .
+		if ( false === wp_verify_nonce( $_GET['_wpnonce'], 'nmpp-success' ) ) {
+			return;
+		}
+
 		$var = esc_attr( wp_unslash( $_GET['news_match_popup'] ) );
 		if ( 'success' !== $var ) {
 			return;
