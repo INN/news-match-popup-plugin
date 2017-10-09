@@ -35,10 +35,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
-// Include additional php files here.
-// require 'includes/something.php';
-
 /**
  * Main initiation class.
  *
@@ -81,7 +77,7 @@ final class News_Match_Popup_Basics {
 	protected $admin_messages = array();
 
 	/**
-	 * option key and option page slug
+	 * Option key and option page slug
 	 *
 	 * @var string
 	 * @since 0.1.1
@@ -89,7 +85,7 @@ final class News_Match_Popup_Basics {
 	const KEY = 'news_match_popup_basics';
 
 	/**
-	 * slug of settings section
+	 * Slug of settings section
 	 *
 	 * @var string $settings_section The settings section slug
 	 */
@@ -112,8 +108,25 @@ final class News_Match_Popup_Basics {
 	protected static $single_instance = null;
 
 	/**
+	 * The mailchimp modification class
+	 *
+	 * @var News_Match_Popup_Basics_Mailchimp
+	 * @since 0.1.1
+	 */
+	private $mailchimp = null;
+
+	/**
+	 * The URL-based exclusion policy
+	 *
+	 * @var News_Match_Popup_Basics_Url_Exclude
+	 * @since 0.1.1
+	 */
+	private $excluder = null;
+
+	/**
 	 * The settings page and suchlike
 	 *
+	 * @var News_Match_Popup_Basics_Settings
 	 * @since 0.1.1
 	 */
 	private $settings = null;
@@ -143,12 +156,14 @@ final class News_Match_Popup_Basics {
 		$this->url     = plugin_dir_url( __FILE__ );
 
 		// Initialize the settings.
-		require_once( $this->path . '/classes/class-news_match_popup_basics_settings.php' );
-		require_once( $this->path . '/classes/class-news_match_popup_basics_mailchimp.php' );
-		require_once( $this->path . '/classes/class-news_match_popup_basics_url_exclude.php' );
+		require_once( $this->path . '/classes/class-news-match-popup-basics-settings.php' );
+		require_once( $this->path . '/classes/class-news-match-popup-basics-mailchimp.php' );
+		require_once( $this->path . '/classes/class-news-match-popup-basics-url-exclude.php' );
 		$this->settings = new News_Match_Popup_Basics_Settings( self::KEY );
+
+		// Do these always need to be created? They aren't used on admin pages.
 		$this->mailchimp = new News_Match_Popup_Basics_Mailchimp( self::KEY, $this->url );
-		$this->settings = new News_Match_Popup_Basics_Url_Exclude( self::KEY );
+		$this->excluder = new News_Match_Popup_Basics_Url_Exclude( self::KEY );
 	}
 
 	/**
@@ -198,14 +213,16 @@ final class News_Match_Popup_Basics {
 	 * @since  0.1.0
 	 */
 	public function init() {
-		$var = esc_attr( $_GET['news_match_popup'] );
-		if ( 'success' === $var ) {
-			add_action( 'all_admin_notices', array( $this, 'generic_admin_notices' ) );
-		}
 
 		// Bail early if requirements aren't met.
 		if ( ! $this->check_requirements() ) {
 			return;
+		}
+
+		// not checking nonce at this point because the enqueued function will check the nonce before doing anything.
+		$var = esc_attr( wp_unslash( $_GET['news_match_popup'] ) );
+		if ( 'success' === $var ) {
+			add_action( 'all_admin_notices', array( $this, 'generic_admin_notices' ) );
 		}
 
 		// Load translated strings for plugin.
@@ -219,30 +236,28 @@ final class News_Match_Popup_Basics {
 	 * @todo split this into its own class, please
 	 */
 	public function create_popup() {
-		// we need the current user's ID for this case.
+		// we need the current user's ID for this case. WordPress's PHP_CodeSniffer rules complain that this variable is not in snake_case; it's a WordPress global variable so ignore that rule.
 		global $user_ID;
 
 		// Create the post.
 		$new_post = array(
 			'post_title' => 'News Match Default Popup',
-			'post_content' => 'The text, graphics, shortcodes and links in this area are displayed in your popup.',
+			'post_content' => 'The text, graphics, shortcodes and links in this area are displayed in your popup. Change the name of this popup, add a title, add a newsletter signup - the possibilities are endless!',
 			'post_status' => 'draft',
-			'post_date' => date('Y-m-d H:i:s'),
+			'post_date' => date( 'Y-m-d H:i:s' ),
 			'post_author' => $user_ID,
 			'post_type' => 'popup',
-			'post_category' => array(0)
+			'post_category' => array( 0 ),
 		);
 		$post_id = wp_insert_post( $new_post );
 
-	 	// If creating the post did not work, create an error message.
-		if ( empty( $post_id ) || false == $post_id ) {
+		// If creating the post did not work, create an error message.
+		if ( empty( $post_id ) || 0 === $post_id || $post_id instanceof WP_Error ) {
 			$default_message = __( 'News Match Popup Basics encountered an error while creating the default popup.', 'news-match-popup-basics' );
 			$details = sprintf(
-				// translators:
-				// %1$s is var_dumped contents of a PHP variable
-				// %2$s is https://github.com/INN/newsmatch-popup-plugin/issues
+				// translators: %1$s is var_dumped contents of a PHP variable, %2$s is https://github.com/INN/newsmatch-popup-plugin/issues .
 				__( 'The post ID returned by <code>wp_insert_post</code> was <strong>%1$s</strong>: this is not right. <a href="%2$s">Please file a bug</a>.', 'news-match-popup-basics' ),
-				var_dump( $post_id ),
+				var_dump( $post_id ), // debug code used in production for debugging should something go wrong.
 				esc_attr( 'https://github.com/INN/newsmatch-popup-plugin/issues' )
 			);
 			$messages[] = sprintf(
@@ -257,12 +272,12 @@ final class News_Match_Popup_Basics {
 			return false;
 		}
 
-		// to do: get the ID of an existing popup theme
+		// to do: get the ID of an existing popup theme, if necessary.
 
 		// Create the post meta.
 		$meta = array(
-			// key => value
-			'popup_display' => 	array (
+			// meta_key => meta_value.
+			'popup_display' => array(
 				'size' => 'large',
 				'responsive_min_width' => '',
 				'responsive_max_width' => '',
@@ -285,24 +300,24 @@ final class News_Match_Popup_Basics {
 				'custom_width_unit' => 'px',
 				'custom_height_unit' => 'px',
 			),
-			'popup_close' =>array (
+			'popup_close' => array(
 				'text' => '',
 				'button_delay' => '0',
 				'overlay_click' => 'true',
 				'esc_press' => 'true',
 			),
 			'popup_title' => '',
-			'popup_teme' => null, // This should be the ID of an existing popup theme, probably the default, ack
+			'popup_teme' => null, // This should be the ID of an existing popup theme, probably the default, ack.
 			'popup_triggers' => array(
-				array (
+				array(
 					'type' => 'auto_open',
 					'settings' =>
-					array (
+					array(
 						'delay' => '25000',
 						'cookie' =>
-						array (
+						array(
 							'name' =>
-							array (
+							array(
 								0 => esc_attr( sprintf(
 									'pum-%1$s',
 									$post_id
@@ -310,13 +325,13 @@ final class News_Match_Popup_Basics {
 							),
 						),
 					),
-				)
+				),
 			),
 			'popup_cookies' => array(
-				array (
+				array(
 					'event' => 'on_popup_close',
 					'settings' =>
-					array (
+					array(
 						'name' => esc_attr( sprintf(
 							'pum-%1$s',
 							$post_id
@@ -325,16 +340,16 @@ final class News_Match_Popup_Basics {
 						'time' => '1 year',
 						'path' => 1,
 					),
-				)
+				),
 			),
 			'popup_conditions' => array(
-				array (
+				array(
 					0 =>
-					array (
+					array(
 						'not_operand' => 0,
 						'target' => 'is_front_page',
 					),
-				)
+				),
 			),
 			'popup_open_count' => 0,
 			'popup_open_count_total' => 0,
@@ -345,8 +360,8 @@ final class News_Match_Popup_Basics {
 		}
 
 		// Success!
-		// translators: %1$s is a wordpress admin URL and %2$s is the ID of the post (part of the url)
 		$message_parts[] = sprintf(
+			// translators: %1$s is a WordPress admin URL and %2$s is the ID of the post (part of the url).
 			__( 'Your new default popup has been created! <a href="%1$s%2$s">Edit it now</a>.', 'news-match-popup-basics' ),
 			admin_url( 'post.php?action=edit&post=' ),
 			esc_attr( $post_id )
@@ -363,20 +378,25 @@ final class News_Match_Popup_Basics {
 	}
 
 	/**
-	 * Filter the redirect to make sure that we trigger our notice on single-plugin activation
+	 * Filter the redirect to make sure that we trigger our notice on single-plugin activation.
 	 *
-	 * This doesn't apply to multiple-plugin activation. I'm assuming that if someone is multi-activating, they'll multi-activate this plugin alongside Popup Maker, and its (very annoying) activation redirect will kick in, which takes the browser to a consent dialog, which takes the browser to the list of popups, which is where we wanted to send the user in the first place.
+	 * We're adding a query arg and a nonce to the redirect URL query, and that arg and nonce are checked by the function in our plugin that's looking for them, generic_admin_notices.
+	 *
+	 * Is it noncing necessary here? I have questions about whether noncing this is even possible, because the URL at this point is the activation URL from the plugins list, and the plugin can't modify that before it's been activated. At the point that this filter runs during the activation process, the plugin has already been activated, and because nonces are used once, we can't use that nonce. There are no nonces available to this plugin to verify before looking at $_GET.
+	 *
+	 * This filter doesn't apply to multiple-plugin activation. I'm assuming that if someone is multi-activating, they'll multi-activate this plugin alongside Popup Maker, and its (very annoying) activation redirect will kick in, which takes the browser to a consent dialog, which takes the browser to the list of popups, which is where we wanted to send the user in the first place.
 	 * Hooray?
-	 * @link https://github.com/INN/newsmatch-popup-plugin/issues/8
 	 *
-	 * @param string $location The destination URL.
-	 * @param int $status The HTTP status code with the redirect.
+	 * @link https://github.com/INN/newsmatch-popup-plugin/issues/8
+	 * @param string $loc The destination URL.
+	 * @param int    $status The HTTP status code with the redirect.
 	 */
 	public function redirect_filter( $loc, $status ) {
-		if ( ! current_user_can('activate_plugins') ) {
+		if ( ! current_user_can( 'activate_plugins' ) ) {
 			return $loc;
 		}
 
+		// check if we're activating a plugin.
 		if ( ! isset( $_GET['action'] ) || 'activate' !== $_GET['action'] ) {
 			return $loc;
 		}
@@ -386,12 +406,17 @@ final class News_Match_Popup_Basics {
 			return $loc;
 		}
 
-		// plugin page redirect uses 302
+		// Plugin page redirect uses 302, and we want to only run then.
 		if ( 302 !== $status ) {
 			return $loc;
 		}
 
+		// Add the plugin's success parameter to the redirect URL.
 		$loc = add_query_arg( 'news_match_popup', 'success', $loc );
+
+		// Add nonce.
+		$loc = html_entity_decode( wp_nonce_url( $loc, 'nmpp-success' ) ); // wp_nonce_url escapes for display and there's no way to turn that off.
+
 		return $loc;
 	}
 
@@ -470,13 +495,18 @@ final class News_Match_Popup_Basics {
 	 * @since 0.1.0
 	 */
 	public function generic_admin_notices() {
-		$var = esc_attr( $_GET['news_match_popup'] );
+		// nonce set in $this->redirect_filter() .
+		if ( false === wp_verify_nonce( $_GET['_wpnonce'], 'nmpp-success' ) ) {
+			return;
+		}
+
+		$var = esc_attr( wp_unslash( $_GET['news_match_popup'] ) );
 		if ( 'success' !== $var ) {
 			return;
 		}
 
 		$messages = get_transient( $this->transient );
-		if ( false !== $messages && !empty ( $messages ) ) {
+		if ( false !== $messages && ! empty( $messages ) ) {
 			foreach ( $messages as $message ) {
 				if ( is_string( $message ) ) {
 					echo wp_kses_post( $message );

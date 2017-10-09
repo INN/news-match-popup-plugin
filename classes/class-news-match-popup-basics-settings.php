@@ -1,29 +1,35 @@
 <?php
-/*
- * This class contains the settings and functionality for the News Match Popup Basics plugin's suppression of popups containing mailchimp signup dialogs when the browser has been referred from a Mailchimp-analytics-using URL
+/**
+ * The settings file.
  *
  * @since 0.1.1
  * @package News_Match_Popup_Basics
  */
 
+/**
+ * This class contains the settings and functionality for the News Match Popup Basics plugin's suppression of popups containing mailchimp signup dialogs when the browser has been referred from a Mailchimp-analytics-using URL
+ *
+ * @since 0.1.1
+ * @package News_Match_Popup_Basics
+ */
 class News_Match_Popup_Basics_Settings {
 	/**
-	 * option key and option page slug
+	 * Option key and option page slug
 	 *
 	 * @var string
 	 * @since 0.1.1
 	 */
 	private $key = '';
 
-	/*
-	 * slug of settings group
+	/**
+	 * Slug of settings group
 	 *
 	 * @var string $settings_group The settings group slug
 	 */
 	private $settings_group = '';
 
 	/**
-	 * slug of settings section
+	 * Slug of settings section
 	 *
 	 * @var string $settings_section The settings section slug
 	 */
@@ -38,10 +44,10 @@ class News_Match_Popup_Basics_Settings {
 	protected $title = '';
 
 	/**
-	 * set us up the vars from the plugin's single instance
-	 * initialize the hooks
+	 * Set us up the vars from the plugin's single instance
 	 *
 	 * @since 0.1.1
+	 * @param string $settings_key the option key in wp_options.
 	 */
 	public function __construct( $settings_key ) {
 		$this->key = $settings_key;
@@ -54,9 +60,6 @@ class News_Match_Popup_Basics_Settings {
 	}
 
 	/**
-	 * this should be hooked on admin_init
-	 * it should register settings
-	 *
 	 * The settings section and settings group and option name were all registered in the save
 	 *
 	 * @since 0.1.1
@@ -66,7 +69,7 @@ class News_Match_Popup_Basics_Settings {
 
 		add_settings_section(
 			$this->settings_section,
-			esc_html__( $this->title, 'news-match-popup-basics' ),
+			esc_html( $this->title ),
 			array( $this, 'settings_section_callback' ),
 			$this->key
 		);
@@ -78,7 +81,7 @@ class News_Match_Popup_Basics_Settings {
 			$this->key,
 			$this->settings_section,
 			array(
-				'name' => $this->key . '[mailchimp_toggle]'
+				'name' => $this->key . '[mailchimp_toggle]',
 			)
 		);
 
@@ -89,7 +92,7 @@ class News_Match_Popup_Basics_Settings {
 			$this->key,
 			$this->settings_section,
 			array(
-				'name' => $this->key . '[mailchimp_campaign]'
+				'name' => $this->key . '[mailchimp_campaign]',
 			)
 		);
 
@@ -100,7 +103,7 @@ class News_Match_Popup_Basics_Settings {
 			$this->key,
 			$this->settings_section,
 			array(
-				'name' => $this->key . '[donate_toggle]'
+				'name' => $this->key . '[donate_toggle]',
 			)
 		);
 
@@ -111,41 +114,39 @@ class News_Match_Popup_Basics_Settings {
 			$this->key,
 			$this->settings_section,
 			array(
-				'name' => $this->key . '[donate_urls]'
+				'name' => $this->key . '[donate_urls]',
 			)
 		);
 
 		return true;
 	}
 
-	// @todo: clean these up so they have proper labels
-
 	/**
-	 * @todo
-	 * Gather the settings values from the $_POST
-	 * clean them up
-	 * save them in the db
+	 * Gather the settings values from the $_POST, clean them
+	 *
+	 * @since 0.1.1
+	 * @param array $value the submitted settings values.
 	 */
 	public function settings_sanitizer( $value ) {
 		$new_settings = array();
 
-		if ( isset( $value['mailchimp_toggle'] )  && ! empty( $value['mailchimp_toggle'] ) ) {
+		if ( isset( $value['mailchimp_toggle'] ) && ! empty( $value['mailchimp_toggle'] ) ) {
 			if ( 'on' === $value['mailchimp_toggle'] ) {
 				$new_settings['mailchimp_toggle'] = 'on';
 			}
 		}
 
-		if ( isset( $value['mailchimp_campaign'] )  && ! empty( $value['mailchimp_campaign'] ) ) {
+		if ( isset( $value['mailchimp_campaign'] ) && ! empty( $value['mailchimp_campaign'] ) ) {
 			$new_settings['mailchimp_campaign'] = esc_attr( $value['mailchimp_campaign'] );
 		}
 
-		if ( isset( $value['donate_toggle'] )  && ! empty( $value['donate_toggle'] ) ) {
+		if ( isset( $value['donate_toggle'] ) && ! empty( $value['donate_toggle'] ) ) {
 			if ( 'on' === $value['donate_toggle'] ) {
 				$new_settings['donate_toggle'] = 'on';
 			}
 		}
 
-		if ( isset( $value['donate_urls'] )  && ! empty( $value['donate_urls'] ) ) {
+		if ( isset( $value['donate_urls'] ) && ! empty( $value['donate_urls'] ) ) {
 			$potential_urls = explode( PHP_EOL, $value['donate_urls'] );
 			foreach ( $potential_urls as $url ) {
 				$new_urls[] = $this->remove_protocol_from_url( $url );
@@ -159,11 +160,12 @@ class News_Match_Popup_Basics_Settings {
 	/**
 	 * Function to strip the frontmatter from a URL
 	 *
-	 * @return string The URL without the protocol or domain name
+	 * @param string $url The URL passed to the function, which may have a protocol that should be removed.
+	 * @return string The URL without the protocol or domain name.
 	 * @since 0.1.1
 	 */
 	public function remove_protocol_from_url( $url ) {
-		// remove protocol
+		// remove protocol http(s).
 		return preg_replace( '/^http(s)?:\/\//', '', $url );
 	}
 
@@ -183,16 +185,16 @@ class News_Match_Popup_Basics_Settings {
 
 		echo sprintf(
 			'<input name="%1$s" id="%1$s" type="checkbox" value="on" %2$s>',
-			$args['name'],
+			esc_attr( $args['name'] ),
 			checked( $value, 'on', false )
 		);
 		echo sprintf(
 			'<label for="%2$s">%1$s</label>',
-			__( 'Checking this box will prevent popups containing a Mailchimp signup form with the HTML element ID <code>#mc_embed_signup</code> from appearing when visiting your site at a link with a <code>utm_source</code> parameter matching the one entered in the box below.', 'news-match-popup-basics' ),
-			$args['name']
+			wp_kses_post( __( 'Checking this box will prevent popups containing a Mailchimp signup form with the HTML element ID <code>#mc_embed_signup</code> from appearing when visiting your site at a link with a <code>utm_source</code> parameter matching the one entered in the box below.', 'news-match-popup-basics' ) ),
+			esc_attr( $args['name'] )
 		);
 	}
-	
+
 	/**
 	 * Display text input for mailchimp campaign ID
 	 *
@@ -210,11 +212,11 @@ class News_Match_Popup_Basics_Settings {
 		echo sprintf(
 			'<p><code>utm_source=</code><input name="%1$s" id="%1$s" type="text" value="%2$s"></p>',
 			esc_attr( $args['name'] ),
-			$value
+			esc_attr( $value )
 		);
 		echo sprintf(
 			'<label for="%2$s">%1$s</label>',
-			__( 'The campaign name can be found by examining outbound links from your Mailchimp newsletter, then carefully copying everything between <code>utm_source=</code> and <code>&amp;</code>.', 'news-match-popup-basics' ),
+			wp_kses_post( __( 'The campaign name can be found by examining outbound links from your Mailchimp newsletter, then carefully copying everything between <code>utm_source=</code> and <code>&amp;</code>.', 'news-match-popup-basics' ) ),
 			esc_attr( $args['name'] )
 		);
 
@@ -241,17 +243,15 @@ class News_Match_Popup_Basics_Settings {
 		);
 		echo sprintf(
 			'<label for="%2$s">%1$s</label>',
-			__( 'Checking this box will prevent <strong>all</strong> Popup Maker popups from appearing on pages with URLs matching the URLs entered in the box below.', 'news-match-popup-basics' ),
-			$args['name']
+			wp_kses_post( __( 'Checking this box will prevent <strong>all</strong> Popup Maker popups from appearing on pages with URLs matching the URLs entered in the box below.', 'news-match-popup-basics' ) ),
+			esc_attr( $args['name'] )
 		);
 	}
 
 	/**
 	 * Display text area input for donation page URLs where the mailchimp popup should not appear
 	 *
-	 * @todo: can this be done with better page targeting in the default plugin?
-	 * 		- no, "NOT" targeting requires purchasing an additional plugin extension.
-	 * @todo: better sanitizing of this on this side, not on the submit side
+	 * @param array $args The extra arguments passed to add_settings_field callbacks.
 	 * @since 0.1.1
 	 */
 	public function donate_urls( $args ) {
@@ -265,14 +265,14 @@ class News_Match_Popup_Basics_Settings {
 		echo sprintf(
 			'<textarea name="%1$s" id="%1$s" type="checkbox" wrap="off" style="width: 100%%; display: block;">%2$s</textarea>',
 			esc_attr( $args['name'] ),
-			$value
+			$value // $value is already escaped above. It's either '' or it's been wp_kses_post'd.
 		);
 
 		// reminder to remove http(s)?:// .
 		echo sprintf(
 			'<label for="%1$s">%2$s</label>',
 			esc_attr( $args['name'] ),
-			__( 'Each URL should be entered on a separate line. Please remove the opening <code>https://</code> or <code>http://</code> from the URL, as it is not needed in this context. You can also provide URL fragments such as <code>/donate/</code> to hit both <code>example.org/donate/</code> and <code>example.org/about-us/donate</code>.', 'news-match-popup-basics' )
+			wp_kses_post( __( 'Each URL should be entered on a separate line. Please remove the opening <code>https://</code> or <code>http://</code> from the URL, as it is not needed in this context. You can also provide URL fragments such as <code>/donate/</code> to hit both <code>example.org/donate/</code> and <code>example.org/about-us/donate</code>.', 'news-match-popup-basics' ) )
 		);
 	}
 
