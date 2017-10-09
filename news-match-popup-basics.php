@@ -242,7 +242,7 @@ final class News_Match_Popup_Basics {
 		// Create the post.
 		$new_post = array(
 			'post_title' => 'News Match Default Popup',
-			'post_content' => 'The text, graphics, shortcodes and links in this area are displayed in your popup.',
+			'post_content' => 'The text, graphics, shortcodes and links in this area are displayed in your popup. Change the name of this popup, add a title, add a newsletter signup - the possibilities are endless!',
 			'post_status' => 'draft',
 			'post_date' => date( 'Y-m-d H:i:s' ),
 			'post_author' => $user_ID,
