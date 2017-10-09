@@ -145,8 +145,10 @@ final class News_Match_Popup_Basics {
 		// Initialize the settings.
 		require_once( $this->path . '/classes/class-news_match_popup_basics_settings.php' );
 		require_once( $this->path . '/classes/class-news_match_popup_basics_mailchimp.php' );
+		require_once( $this->path . '/classes/class-news_match_popup_basics_url_exclude.php' );
 		$this->settings = new News_Match_Popup_Basics_Settings( self::KEY );
 		$this->mailchimp = new News_Match_Popup_Basics_Mailchimp( self::KEY, $this->url );
+		$this->settings = new News_Match_Popup_Basics_Url_Exclude( self::KEY );
 	}
 
 	/**
