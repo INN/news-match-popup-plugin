@@ -1,14 +1,20 @@
 <?php
-/*
- * This class contains the functionality for the News Match Popup Basics plugin's suppression of of all popups on pages that match the URLs defined in the News Match Popup Basics settings
+/**
+ * File contains class News_Match_Popup_Basics_Url_Exclude
  *
  * @since 0.1.1
  * @package News_Match_Popup_Basics
  */
 
+/**
+ * This class contains the functionality for the News Match Popup Basics plugin's suppression of of all popups on pages that match the URLs defined in the News Match Popup Basics settings
+ *
+ * @since 0.1.1
+ * @package News_Match_Popup_Basics
+ */
 class News_Match_Popup_Basics_Url_Exclude {
 	/**
-	 * option key
+	 * Option key
 	 *
 	 * @var string
 	 * @since 0.1.1
@@ -16,9 +22,10 @@ class News_Match_Popup_Basics_Url_Exclude {
 	private $key = '';
 
 	/**
-	 * set us up the vars from the plugin's single instance
+	 * Set us up the vars from the plugin's single instance
 	 * initialize the hooks
 	 *
+	 * @param string $settings_key the settings key in wp_options for the plugin.
 	 * @since 0.1.1
 	 */
 	public function __construct( $settings_key ) {
@@ -28,7 +35,7 @@ class News_Match_Popup_Basics_Url_Exclude {
 
 	/**
 	 * Determine whether or not to prevent enqueueing of popups
-	 * 
+	 *
 	 * @since 0.1.1
 	 * @return Boolean whether or not the mailchimp_enqueue function was run.
 	 */
@@ -41,14 +48,14 @@ class News_Match_Popup_Basics_Url_Exclude {
 			return false;
 		}
 
-		// check whether the present URL is one of those URLs
+		// check whether the present URL is one of those URLs.
 		$potential_urls = explode( PHP_EOL, $option['donate_urls'] );
 		global $wp;
 		$current_url = trailingslashit( home_url( $wp->request ) );
 
 		$dequeue = false;
 		foreach ( $potential_urls as $url ) {
-			if ( false !== strpos ( $current_url, $url ) ) {
+			if ( false !== strpos( $current_url, $url ) ) {
 				$dequeue = true;
 				continue;
 			}
