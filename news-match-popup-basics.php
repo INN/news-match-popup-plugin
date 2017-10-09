@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: News Match Popup Basics
- * Plugin URI:  https://labs.inn.org
+ * Plugin URI:  https://github.com/INN/newsmatch-popup-plugin
  * Description: An introduction to popups for Knight News Match program particpants, and others
  * Version:     0.1.1
  * Author:      innlabs
