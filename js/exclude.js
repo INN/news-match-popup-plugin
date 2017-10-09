@@ -7,6 +7,7 @@
 		var match = new RegExp( 'utm_source=' + escaped, 'i' );
 
 		if (window.location.href.match( match )) {
+			// @since Popup Maker v1.6.6
 			$popup.addClass('preventOpen');
 		}
 	});

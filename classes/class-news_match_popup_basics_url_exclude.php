@@ -23,7 +23,7 @@ class News_Match_Popup_Basics_Url_Exclude {
 	 */
 	public function __construct( $settings_key ) {
 		$this->key = $settings_key;
-		add_action( 'wp_enqueue_scripts', array( $this, 'popmake_maybe_dequeue' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'popmake_maybe_dequeue' ), 9 );
 	}
 
 	/**
@@ -44,11 +44,7 @@ class News_Match_Popup_Basics_Url_Exclude {
 		// check whether the present URL is one of those URLs
 		$potential_urls = explode( PHP_EOL, $option['donate_urls'] );
 		global $wp;
-		$current_url = home_url( $wp->request );
-		if ( ! is_404() ) {
-			error_log(var_export( $current_url, true));
-			error_log(var_export( $potential_urls, true));
-		}
+		$current_url = trailingslashit( home_url( $wp->request ) );
 
 		$dequeue = false;
 		foreach ( $potential_urls as $url ) {
@@ -60,20 +56,28 @@ class News_Match_Popup_Basics_Url_Exclude {
 
 		if ( $dequeue ) {
 			$this->dequeue();
-			return true
+			return true;
 		}
 
 		return false;
 	}
 
 	/**
-	 * Dequeue all the URLs
+	 * Dequeue all the things that get enqueued that are directly related to popups.
+	 *
+	 * This doesn't address the admin bar scripts, styles, or admin bar entry.
 	 *
 	 * @since 0.1.1
+	 * @since Popup Maker v1.6.6
 	 */
 	public function dequeue() {
-		error_log(var_export( 'gonna dequeue everything popmake-related nao', true));
+		remove_action( 'wp_enqueue_scripts', 'popmake_load_site_scripts', 10 );
+		remove_action( 'wp_enqueue_scripts', 'popmake_load_site_styles', 10 );
 		remove_action( 'wp_enqueue_scripts', 'popmake_preload_popups', 11 );
 		remove_action( 'wp_footer', 'popmake_render_popups', 1 );
+		remove_action( 'wp_head', 'popmake_render_popup_theme_styles', 99999 );
+		remove_action( 'wp_head', 'popmake_script_loading_enabled', 10 );
+		remove_action( 'admin_head', 'popmake_render_popup_theme_styles', 99999 );
+		wp_dequeue_script( 'news-match-popup-basics-mailchimp' );
 	}
 }

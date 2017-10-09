@@ -32,7 +32,7 @@ class News_Match_Popup_Basics_Mailchimp {
 	public function __construct( $settings_key, $url ) {
 		$this->key = $settings_key;
 		$this->url = $url;
-		add_action( 'wp_enqueue_scripts', array( $this, 'mailchimp_maybe_enqueue' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'mailchimp_maybe_enqueue' ), 9 );
 	}
 
 	/**
@@ -59,6 +59,7 @@ class News_Match_Popup_Basics_Mailchimp {
 	 *
 	 * @param array $option The options array for this plugin
 	 * @since 0.1.1
+	 * @since Popup Maker v1.6.6
 	 */
 	public function mailchimp_enqueue( $options = array() ) {
 		wp_register_script(
