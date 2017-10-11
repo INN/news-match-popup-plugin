@@ -1,20 +1,21 @@
 <?php
 /**
  * Plugin Name: News Match Popup Basics
- * Plugin URI:  https://github.com/INN/news-match-popup-plugin
+ * Plugin URI:  https://wordpress.org/plugins/news-match-popup-basics
  * Description: An introduction to popups for Knight News Match program particpants, and others
- * Version:     0.1.1
+ * Version:     0.1.2
  * Author:      innlabs
  * Author URI:  https://labs.inn.org
  * Donate link: https://labs.inn.org
  * License:     GPLv2 or later
  * Text Domain: news-match-popup-basics
  * Domain Path: /languages
+ * Requires at least: 4.8.2
  *
  * @link    https://labs.inn.org
  *
  * @package News_Match_Popup_Basics
- * @version 0.1.1
+ * @version 0.1.2
  */
 
 /**
