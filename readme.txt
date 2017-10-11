@@ -68,4 +68,10 @@ Once at least one URL has been added to the text box, and the check box has been
 
 No.
 
+= Is there advice specific to Knight News Match program participants? =
+
+We recommend that you use the [News Match Donation Shortcode](https://wordpress.org/plugins/news-match-donation-shortcode) plugin to place donation forms in popups on your site, and on your site's donation page.
+
+We also recommend you use this plugin's suppression features to prevent all popups from appearing on your donation and subscription pages.
+
 == Changelog ==
