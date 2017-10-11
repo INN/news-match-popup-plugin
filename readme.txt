@@ -43,12 +43,15 @@ The popup:
 - automatically opens after 25 seconds on the page, because immediate popup appearances can be jarring
 - once dismissed by a reader, does not appear again for a year or until the reader clears their browser's cookies, whichever comes first
 - appears on the front page of the site
+- uses Popup Maker's default theme
 
 For more about Popup Maker's options for popup placement and behavior, read [the Popup Maker documentation for the Popup Editor](http://docs.wppopupmaker.com/article/39-creating-a-popup).
 
 = Can I change those settings? =
 
 Once the popup is created, you can modify the popup just like any other popup. The popup will not appear on your site until you publish it.
+
+To change the appearance of the popup, you can use [Popup Maker's included theming engine](http://docs.wppopupmaker.com/category/154-theming-popups), CSS in your site's theme, [Jetpack's Custom CSS Editor](https://jetpack.com/support/custom-css/), or other tools that allow you to define new styles.
 
 = How does the MailChimp popup suppression work? =
 
