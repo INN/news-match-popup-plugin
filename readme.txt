@@ -3,7 +3,7 @@ Contributors: innlabs
 Tags: popup, popmake
 Tested up to: 4.8.2
 Requires PHP: 7
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,6 +60,51 @@ In the WordPress Dashboard, under the "Popup Maker" menu item, on the "News Matc
 From one of the emails you have sent, find a link that contains a `utm_source=` parameter and copy the following argument text, up until any `&` character, into the text box. For example, a Nerd Alert newsletter sent by INN Labs contained a link that looked like this: `https://example.org/?utm_source=Nerd+Alert&utm_campaign=4d4ecd9f68-EMAIL_CAMPAIGN_2017_10_06&utm_medium=email&utm_term=0_1476113985-4d4ecd9f68-421742753`. From that URL, you would copy `Nerd+Alert` into the text box.
 
 Once you have provided a `utm_source` parameter, checked the checkbox, and saved the settings, any popup that contains an HTML element with an `id` attribute equal to `mc_embed_signup`, or a CSS selector equal to `#mc_embed_signup`, will be suppressed. Suppression works client-side using JavaScript that runs in the visitor's browser.
+
+= Why does MailChimp popup suppression use `#mc_embed_signup`? =
+
+When you generate [a MailChimp embedded signup form](https://kb.mailchimp.com/lists/signup-forms/add-a-signup-form-to-your-website), MailChimp provides HTML by default that looks like this:
+
+```html
+<!-- Begin MailChimp Signup Form -->
+<link href="//cdn-images.mailchimp.com/embedcode/classic-10_7.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+	#mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif; }
+	/* Add your own MailChimp form style overrides in your site stylesheet or in this style block.
+	   We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+</style>
+<div id="mc_embed_signup">
+	<form action="" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+		<div id="mc_embed_signup_scroll">
+			<h2>Subscribe to our mailing list</h2>
+
+			... the actual form ...
+
+			<!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+			<div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="" tabindex="-1" value=""></div>
+			<div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+		</div>
+	</form>
+</div>
+<script type='text/javascript' src='//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js'></script><script type='text/javascript'>(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='MMERGE3';ftypes[3]='radio';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+<!--End mc_embed_signup-->
+```
+
+News Match Popup Basics uses `#mc_embed_signup` as the selector for disabling MailChimp signup forms because that's what MailChimp uses. You can also apply a filter to `news_match_popup_basics_mailchimp_selector` to change the selector; your filter function should accept a string as its first parameter and return a string. There are no other parameters:
+
+```php
+/**
+ * Filter to change the News Match Popup Basics mailchimp suppression selector
+ *
+ * @since News Match Popup Basics 0.1.2
+ * @param string $selector A CSS selector that chooses mailchimp forms within Popup Maker popups; default is '.pum #mc_embed_signup'.
+ * @return string The new selector
+ */
+function my_filter( $selector ) {
+	return '.pum .class_added_to_all_mailchimp_forms';
+}
+add_filter( 'news_match_popup_basics_mailchimp_selector', 'my_filter' );
+```
 
 = How does the donation page popup suppression work? =
 

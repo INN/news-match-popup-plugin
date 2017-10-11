@@ -82,6 +82,13 @@ class News_Match_Popup_Basics_Mailchimp {
 			'news_match_popup_basics_mailchimp',
 			array(
 				'campaign' => $options['mailchimp_campaign'],
+				/**
+				 * @filter news_match_popup_basics_mailchimp_selector
+				 * @param string $selector A CSS selector that chooses mailchimp forms within Popup Maker popups; default is '.pum #mc_embed_signup'.
+				 * @return string The new selector.
+				 * @since 0.1.2
+				 */
+				'selector' => apply_filters( 'news_match_popup_basics_mailchimp_selector', '.pum #mc_embed_signup' )
 			)
 		);
 		wp_enqueue_script(
