@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: News Match Popup Basics
- * Plugin URI:  https://github.com/INN/newsmatch-popup-plugin
+ * Plugin URI:  https://github.com/INN/news-match-popup-plugin
  * Description: An introduction to popups for Knight News Match program particpants, and others
  * Version:     0.1.1
  * Author:      innlabs
@@ -255,10 +255,10 @@ final class News_Match_Popup_Basics {
 		if ( empty( $post_id ) || 0 === $post_id || $post_id instanceof WP_Error ) {
 			$default_message = __( 'News Match Popup Basics encountered an error while creating the default popup.', 'news-match-popup-basics' );
 			$details = sprintf(
-				// translators: %1$s is var_dumped contents of a PHP variable, %2$s is https://github.com/INN/newsmatch-popup-plugin/issues .
+				// translators: %1$s is var_dumped contents of a PHP variable, %2$s is https://github.com/INN/news-match-popup-plugin/issues .
 				__( 'The post ID returned by <code>wp_insert_post</code> was <strong>%1$s</strong>: this is not right. <a href="%2$s">Please file a bug</a>.', 'news-match-popup-basics' ),
 				var_dump( $post_id ), // debug code used in production for debugging should something go wrong.
-				esc_attr( 'https://github.com/INN/newsmatch-popup-plugin/issues' )
+				esc_attr( 'https://github.com/INN/news-match-popup-plugin/issues' )
 			);
 			$messages[] = sprintf(
 				'<div id="nmpb-message" class="error"><p>%1$s</p><p>%2$s</p></div>',
@@ -387,7 +387,7 @@ final class News_Match_Popup_Basics {
 	 * This filter doesn't apply to multiple-plugin activation. I'm assuming that if someone is multi-activating, they'll multi-activate this plugin alongside Popup Maker, and its (very annoying) activation redirect will kick in, which takes the browser to a consent dialog, which takes the browser to the list of popups, which is where we wanted to send the user in the first place.
 	 * Hooray?
 	 *
-	 * @link https://github.com/INN/newsmatch-popup-plugin/issues/8
+	 * @link https://github.com/INN/news-match-popup-plugin/issues/8
 	 * @param string $loc The destination URL.
 	 * @param int    $status The HTTP status code with the redirect.
 	 */
@@ -401,8 +401,7 @@ final class News_Match_Popup_Basics {
 			return $loc;
 		}
 
-		// @todo: once we have a wp.org plugin slug, use that instead of the directory on ben's test computer
-		if ( ! isset( $_GET['plugin'] ) || 'newsmatch-popup-plugin/news-match-popup-basics.php' !== $_GET['plugin'] ) {
+		if ( ! isset( $_GET['plugin'] ) || 'news-match-popup-plugin/news-match-popup-basics.php' !== $_GET['plugin'] ) {
 			return $loc;
 		}
 
