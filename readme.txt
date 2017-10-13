@@ -22,7 +22,7 @@ First, install and activate [Popup Maker](https://wordpress.org/plugins/popup-ma
 
 Upon activating this plugin, you should receive a notice in the WordPress plugin dashboard telling you that the plugin has been activated and a new default popup has been created. You can also check for a "News Match Default Popup" at **Popup Maker > All Popups** in the WordPress Dashboard.
 
-Once the plugin has created the default popup, you can go ahead and uninstall the plugin.
+Once the plugin has created the default popup, if you don't want to use News Match Popup Basics' popup suppression features, you can go ahead and uninstall News Match Popup Basics.
 
 == Frequently Asked Questions ==
 
@@ -66,52 +66,48 @@ Once you have provided a `utm_source` parameter, checked the checkbox, and saved
 
 When you generate [a MailChimp embedded signup form](https://kb.mailchimp.com/lists/signup-forms/add-a-signup-form-to-your-website), MailChimp provides HTML by default that looks like this:
 
-```html
-<!-- Begin MailChimp Signup Form -->
-<link href="//cdn-images.mailchimp.com/embedcode/classic-10_7.css" rel="stylesheet" type="text/css">
-<style type="text/css">
-	#mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif; }
-	/* Add your own MailChimp form style overrides in your site stylesheet or in this style block.
-	   We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
-</style>
-<div id="mc_embed_signup">
-	<form action="" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-		<div id="mc_embed_signup_scroll">
-			<h2>Subscribe to our mailing list</h2>
+	<!-- Begin MailChimp Signup Form -->
+	<link href="//cdn-images.mailchimp.com/embedcode/classic-10_7.css" rel="stylesheet" type="text/css">
+	<style type="text/css">
+		#mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif; }
+		/* Add your own MailChimp form style overrides in your site stylesheet or in this style block.
+		   We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+	</style>
+	<div id="mc_embed_signup">
+		<form action="" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+			<div id="mc_embed_signup_scroll">
+				<h2>Subscribe to our mailing list</h2>
 
-			... the actual form ...
+				... the actual form ...
 
-			<!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-			<div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="" tabindex="-1" value=""></div>
-			<div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
-		</div>
-	</form>
-</div>
-<script type='text/javascript' src='//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js'></script><script type='text/javascript'>(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='MMERGE3';ftypes[3]='radio';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
-<!--End mc_embed_signup-->
-```
+				<!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+				<div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="" tabindex="-1" value=""></div>
+				<div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+			</div>
+		</form>
+	</div>
+	<script type='text/javascript' src='//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js'></script><script type='text/javascript'>(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='MMERGE3';ftypes[3]='radio';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+	<!--End mc_embed_signup-->
 
 News Match Popup Basics uses `#mc_embed_signup` as the selector for disabling MailChimp signup forms because that's what MailChimp uses. You can also apply a filter to `news_match_popup_basics_mailchimp_selector` to change the selector; your filter function should accept a string as its first parameter and return a string. There are no other parameters:
 
-```php
-/**
- * Filter to change the News Match Popup Basics mailchimp suppression selector
- *
- * @since News Match Popup Basics 0.1.2
- * @param string $selector A CSS selector that chooses mailchimp forms within Popup Maker popups; default is '.pum #mc_embed_signup'.
- * @return string The new selector
- */
-function my_filter( $selector ) {
-	return '.pum .class_added_to_all_mailchimp_forms';
-}
-add_filter( 'news_match_popup_basics_mailchimp_selector', 'my_filter' );
-```
+	/**
+	 * Filter to change the News Match Popup Basics mailchimp suppression selector
+	 *
+	 * @since News Match Popup Basics 0.1.2
+	 * @param string $selector A CSS selector that chooses mailchimp forms within Popup Maker popups; default is '.pum #mc_embed_signup'.
+	 * @return string The new selector
+	 */
+	function my_filter( $selector ) {
+		return '.pum .class_added_to_all_mailchimp_forms';
+	}
+	add_filter( 'news_match_popup_basics_mailchimp_selector', 'my_filter' );
 
 = How does the donation page popup suppression work? =
 
 In the WordPress Dashboard, under the "Popup Maker" menu item, on the "News Match Popup Basics" page, there is a checkbox that enables donation page popup suppression, and a text box that allows you to add the URLs of donation pages on your site.
 
-Once at least one URL has been added to the text box, and the check box has been checked, the News Match Popup Basics plugin will prevent all Popup Maker popups from appearing on pages which have a URL that matches the URL setting. This function pre-empts the [Popup Maker conditions](http://docs.wppopupmaker.com/article/235-standard-conditions): no matter what conditions a pop has for display, that popup will not appear on a page with a matching URL.
+Once at least one URL has been added to the text box, and the check box has been checked, the News Match Popup Basics plugin will prevent all Popup Maker popups from appearing on pages which have a URL that matches the URL setting. This function pre-empts the [Popup Maker conditions](http://docs.wppopupmaker.com/article/235-standard-conditions): no matter what conditions a popup has for display, that popup will not appear on a page with a matching URL.
 
 = Do I need to install this plugin to participate in the Knight News Match program? =
 
