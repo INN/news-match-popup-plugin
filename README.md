@@ -14,7 +14,7 @@ An introduction to popups for Knight News Match program particpants, and others
 
 ## Installation ##
 
-Please install this plugin through its [WordPress.org plugin page](https://wordpress.org/plugins/news-match-popup-basics)
+Please install this plugin through its [WordPress.org plugin page](https://wordpress.org/plugins/news-match-popup-basics).
 
 ### Manual Installation ###
 
