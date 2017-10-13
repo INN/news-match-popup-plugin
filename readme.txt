@@ -123,3 +123,17 @@ We recommend that you use the [News Match Donation Shortcode](https://wordpress.
 We also recommend you use this plugin's suppression features to prevent all popups from appearing on your donation and subscription pages.
 
 == Changelog ==
+
+= 0.1.2 =
+
+Adds filter `news_match_popup_basics_mailchimp_selector` to allow changing the selector used by `js/exclude.js` for `utm_source`-based popup suppression.
+
+= 0.1.1 =
+
+Adds settings page.
+Adds `utm_source`-based suppression of popups containing MailChimp subscription forms via in-browser checks.
+Adds URL-based suppression of all popups via preventing Popup Maker from enqueueing any popups or assets.
+
+= 0.1 =
+
+Initial plugin, with automatic popup creation.

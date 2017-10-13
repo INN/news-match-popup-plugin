@@ -1,10 +1,10 @@
 # News Match Popup Basics #
 **Contributors:**      innlabs  
 **Donate link:**       https://labs.inn.org  
-**Tags:**  
+**Tags:**              popup, news match
 **Requires at least:** 4.4  
-**Tested up to:**      4.8.1 
-**Stable tag:**        0.1.1  
+**Tested up to:**      4.8.2  
+**Stable tag:**        0.1.2  
 **License:**           GPLv2  
 **License URI:**       http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -14,23 +14,14 @@ An introduction to popups for Knight News Match program particpants, and others
 
 ## Installation ##
 
+Please install this plugin through its [WordPress.org plugin page](https://wordpress.org/plugins/news-match-popup-basics)
+
 ### Manual Installation ###
 
+0. Download this plugin [from its plugins page](https://wordpress.org/plugins/news-match-popup-basics).
 1. Upload the entire `/news-match-popup-basics` directory to the `/wp-content/plugins/` directory.
 2. Activate News Match Popup Basics through the 'Plugins' menu in WordPress.
 
-## Frequently Asked Questions ##
+## FAQ and changelog
 
-
-## Screenshots ##
-
-
-## Changelog ##
-
-### 0.1.0 ###
-* First release
-
-## Upgrade Notice ##
-
-### 0.1.0 ###
-First Release
+Please see the [WordPress.org Plugins page for this plugin](https://wordpress.org/plugins/news-match-popup-basics).
