@@ -2,6 +2,7 @@
 Contributors: innlabs
 Tags: popup, popmake
 Tested up to: 4.8.2
+Requires at least: 4.8.2
 Requires PHP: 7
 Stable tag: 0.1.2
 License: GPLv2 or later
