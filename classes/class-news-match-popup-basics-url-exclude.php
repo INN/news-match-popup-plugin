@@ -55,7 +55,7 @@ class News_Match_Popup_Basics_Url_Exclude {
 
 		$dequeue = false;
 		foreach ( $potential_urls as $url ) {
-			if ( false !== strpos( $current_url, $url ) ) {
+			if ( ! empty( $url ) && false !== strpos( $current_url, $url ) ) {
 				$dequeue = true;
 				continue;
 			}
