@@ -4,7 +4,7 @@ Tags: popup, popmake
 Tested up to: 4.8.2
 Requires at least: 4.8.2
 Requires PHP: 7
-Stable tag: 0.1.2
+Stable tag: 0.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -119,16 +119,22 @@ We also recommend you use this plugin's suppression features to prevent all popu
 
 == Changelog ==
 
+= 0.1.3 =
+
+- Fixes an activation error on older PHP versions.
+- Fixes an empty needle error in the URL-based blocks.
+- Minor text fixes.
+
 = 0.1.2 =
 
-Adds filter `news_match_popup_basics_mailchimp_selector` to allow changing the selector used by `js/exclude.js` for `utm_source`-based popup suppression.
+- Adds filter `news_match_popup_basics_mailchimp_selector` to allow changing the selector used by `js/exclude.js` for `utm_source`-based popup suppression.
 
 = 0.1.1 =
 
-Adds settings page.
-Adds `utm_source`-based suppression of popups containing MailChimp subscription forms via in-browser checks.
-Adds URL-based suppression of all popups via preventing Popup Maker from enqueueing any popups or assets.
+- Adds settings page.
+- Adds `utm_source`-based suppression of popups containing MailChimp subscription forms via in-browser checks.
+- Adds URL-based suppression of all popups via preventing Popup Maker from enqueueing any popups or assets.
 
 = 0.1 =
 
-Initial plugin, with automatic popup creation.
+- Initial plugin, with automatic popup creation.

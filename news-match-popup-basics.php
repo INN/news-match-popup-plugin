@@ -3,7 +3,7 @@
  * Plugin Name: News Match Popup Basics
  * Plugin URI:  https://wordpress.org/plugins/news-match-popup-basics
  * Description: An introduction to popups for Knight News Match program particpants, and others
- * Version:     0.1.2
+ * Version:     0.1.3
  * Author:      INN Labs
  * Author URI:  https://labs.inn.org
  * Donate link: https://labs.inn.org
