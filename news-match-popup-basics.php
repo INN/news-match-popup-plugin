@@ -83,14 +83,16 @@ final class News_Match_Popup_Basics {
 	 * @var string
 	 * @since 0.1.1
 	 */
-	const KEY = 'news_match_popup_basics';
+	private $key = 'news_match_popup_basics';
 
 	/**
 	 * Slug of settings section
 	 *
+	 * This is set in __construct();
+	 *
 	 * @var string $settings_section The settings section slug
 	 */
-	private $settings_section = self::KEY . '_section';
+	private $settings_section = '';
 
 	/**
 	 * Transient name for storing admin notices and other things.
@@ -154,17 +156,18 @@ final class News_Match_Popup_Basics {
 	protected function __construct() {
 		$this->basename = plugin_basename( __FILE__ );
 		$this->path     = plugin_dir_path( __FILE__ );
-		$this->url     = plugin_dir_url( __FILE__ );
+		$this->url      = plugin_dir_url( __FILE__ );
+		$this->settings_section = $this->key . '_section';
 
 		// Initialize the settings.
 		require_once( $this->path . '/classes/class-news-match-popup-basics-settings.php' );
 		require_once( $this->path . '/classes/class-news-match-popup-basics-mailchimp.php' );
 		require_once( $this->path . '/classes/class-news-match-popup-basics-url-exclude.php' );
-		$this->settings = new News_Match_Popup_Basics_Settings( self::KEY );
+		$this->settings = new News_Match_Popup_Basics_Settings( $this->key );
 
 		// Do these always need to be created? They aren't used on admin pages.
-		$this->mailchimp = new News_Match_Popup_Basics_Mailchimp( self::KEY, $this->url );
-		$this->excluder = new News_Match_Popup_Basics_Url_Exclude( self::KEY );
+		$this->mailchimp = new News_Match_Popup_Basics_Mailchimp( $this->key, $this->url );
+		$this->excluder = new News_Match_Popup_Basics_Url_Exclude( $this->key );
 	}
 
 	/**
