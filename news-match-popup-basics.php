@@ -273,7 +273,8 @@ final class News_Match_Popup_Basics {
 			return false;
 		}
 
-		// to do: get the ID of an existing popup theme, if necessary.
+		// to do: get the ID of an existing popup theme.
+		// it's not necessary.
 
 		// Create the post meta.
 		$meta = array(
