@@ -37,7 +37,7 @@ The popup:
 - is not published by default, but requires you to publish it before it becomes active on the site
 - is the size "Large" from Popup Maker's settings
 - appears at the center of the bottom of the reader's screen
-- appears by sliding up from the bottom of the screen, over 350 millisenconds
+- appears by sliding up from the bottom of the screen, over 350 milliseconds
 - has a "Close" button
 - does not prevent readers from interacting with the page by means of an overlay
 - does not have a title
